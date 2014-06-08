@@ -1,11 +1,22 @@
 <html>
 	<head>
+		<script src='/socket.io/socket.io.js'></script>
 		<script>
-			setTimeout(function(){window.location.reload();}, 1000);
+			var refresh = function() {
+				var screen = document.getElementById('screen');
+			    screen.src = '/image?' + new Date().getTime();
+			};
+
+			var socket = io();
+
+			socket.on('refresh', function(){
+				console.log('Refreshing');
+				refresh();
+			});
 		</script>
 	</head>
 
 	<body>
-		<img src="/image"/>
+		<img id="screen" src="/image" style="height:90%"/>
 	</body>
 </html>
