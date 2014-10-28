@@ -4,6 +4,12 @@
 		<script>
 			var refresh = function() {
 				var screen = document.getElementById('screen');
+				screen.addEventListener('click', function(event, pos){
+					if(event.pageX != 0 && event.pageY != 0) {
+						//Math.floor(event.offsetX/screen.width*data.width)
+						//Math.floor(event.offsetY/screen.height*data.height)
+					}
+				});
 			    screen.src = '/image?' + new Date().getTime();
 			};
 
@@ -17,6 +23,6 @@
 	</head>
 
 	<body>
-		<img id="screen" src="/image" style="height:90%"/>
+		<img id="screen" src="/image" style="height:90%;"/>
 	</body>
 </html>
