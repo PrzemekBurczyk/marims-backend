@@ -2,16 +2,21 @@
 	<head>
 		<script src='/socket.io/socket.io.js'></script>
 		<script>
-			var refresh = function() {
-				var screen = document.getElementById('screen');
-			    screen.src = '/image?' + new Date().getTime();
+			var refresh = function(image) {
+				if(image !== null && image !== undefined) {
+					var screen = document.getElementById('screen').setAttribute('src', 'data:image/jpg;base64,' + image);
+				}
 			};
 
 			var socket = io();
 
-			socket.on('refresh', function(){
+			var socket = io('http://localhost/android');
+
+			socket.on('refresh', function(data){
 				console.log('Refreshing');
-				refresh();
+				if(data !== null && data !== undefined){
+					refresh(data.image);
+				}
 			});
 		</script>
 	</head>

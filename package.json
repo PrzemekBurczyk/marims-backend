@@ -5,7 +5,6 @@
   "main": "server.js",
   "scripts": {
     "test": "jasmine-node --verbose ./spec/",
-    "prestart": "node -e \"require('grunt').cli();\"",
     "start": "node ./src/server.js"
   },
   "repository": {
