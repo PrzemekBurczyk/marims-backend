@@ -15,8 +15,13 @@ io.on('connection', function(socket){
   socket.emit('refresh');
 });
 
-io.of('/android').on('connection', function(socket){
+var androidSocket = io.of('/android');
+androidSocket.on('connection', function(socket){
   console.log('Android connected');
+});
+
+androidSocket.on('image', function(image){
+  io.emit('refresh', { image: req.body.image });
 });
 
 var port = Number(process.env.PORT || 5000);
