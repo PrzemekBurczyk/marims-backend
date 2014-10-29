@@ -18,6 +18,7 @@ io.on('connection', function(socket){
 var androidSocket = io.of('/android');
 androidSocket.on('connection', function(socket){
   console.log('Android connected');
+  socket.emit('ok');
 });
 
 androidSocket.on('image', function(image){
