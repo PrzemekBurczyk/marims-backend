@@ -10,19 +10,17 @@ var imgPath = 'uploads/image';
 
 app.use(bodyParser({ limit: '5mb'}));
 
+var androidSocket;
+var browserSocket;
+
 io.on('connection', function(socket){
   console.log('User connected');
-  socket.emit('refresh');
+  socket.emit('start');
 });
 
-var androidSocket = io.of('/android');
-androidSocket.on('connection', function(socket){
-  console.log('Android connected');
-  socket.emit('ok');
-});
-
-androidSocket.on('image', function(image){
-  io.emit('refresh', { image: req.body.image });
+io.on('image', function(image){
+  // io.emit('refresh', { image: req.body.image });
+  io.emit('refresh', image)
 });
 
 var port = Number(process.env.PORT || 5000);

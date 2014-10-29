@@ -12,9 +12,14 @@
 
 			socket.on('refresh', function(data){
 				console.log('Refreshing');
-				if(data !== null && data !== undefined){
-					refresh(data.image);
-				}
+				console.log(data);
+				// if(data !== null && data !== undefined){
+				// 	refresh(data.image);
+				// }
+			});
+
+			socket.on('start', function(){
+				console.log('Starting');
 			});
 		</script>
 	</head>
