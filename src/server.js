@@ -20,7 +20,11 @@ io.on('connection', function(socket){
 
 io.on('image', function(image){
   // io.emit('refresh', { image: req.body.image });
-  io.emit('refresh', image)
+  console.log('got image');
+  for(i = 0; i < io.sockets.length; i++){
+  	io.sockets[i].emit('refresh', image);
+  }
+  // io.sockets.emit('refresh', image);
 });
 
 var port = Number(process.env.PORT || 5000);
