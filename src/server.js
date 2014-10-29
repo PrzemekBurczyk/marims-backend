@@ -19,7 +19,7 @@ io.of('/android').on('connection', function(socket){
   console.log('Android connected');
 });
 
-var port = Number(process.env.PORT || 5000);
+var port = Number(3000);
 http.listen(port, function() {
   console.log(('Listening on ' + port).green);
 });
