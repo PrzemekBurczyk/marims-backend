@@ -4,13 +4,11 @@
 		<script>
 			var refresh = function(image) {
 				if(image !== null && image !== undefined) {
-					var screen = document.getElementById('screen').setAttribute('src', 'data:image/jpg;base64,' + image);
+					document.getElementById('screen').setAttribute('src', 'data:image/jpg;base64,' + image);
 				}
 			};
 
 			var socket = io();
-
-			var socket = io('http://localhost/android');
 
 			socket.on('refresh', function(data){
 				console.log('Refreshing');
