@@ -10,21 +10,18 @@ var imgPath = 'uploads/image';
 
 app.use(bodyParser({ limit: '5mb'}));
 
-var androidSocket;
-var browserSocket;
+var sockets = [];
 
 io.on('connection', function(socket){
+  sockets.push(socket);
   console.log('User connected');
   socket.emit('start');
-});
-
-io.on('image', function(image){
-  // io.emit('refresh', { image: req.body.image });
-  console.log('got image');
-  for(i = 0; i < io.sockets.length; i++){
-  	io.sockets[i].emit('refresh', image);
-  }
-  // io.sockets.emit('refresh', image);
+  socket.on('image', function(image){
+	  console.log('got image');
+	  for(i = 0; i < sockets.length; i++){
+	  	sockets[i].emit('refresh', image);
+	  }
+	});
 });
 
 var port = Number(process.env.PORT || 5000);
