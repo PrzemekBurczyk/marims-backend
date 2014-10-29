@@ -24,7 +24,7 @@ androidSocket.on('image', function(image){
   io.emit('refresh', { image: req.body.image });
 });
 
-var port = Number(process.env.PORT || 5000);
+var port = Number(80);
 http.listen(port, function() {
   console.log(('Listening on ' + port).green);
 });
