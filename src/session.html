@@ -29,7 +29,7 @@
 			
 			var gestureModeActive = false;
 			
-			var refreshImageState = function(imageWidth, imageHeight) {
+			this.refreshImageState = function(imageWidth, imageHeight) {
 				var screen = document.getElementById('screen');
 				screen.onclick = function(event){
 					if(event.pageX != 0 && event.pageY != 0) {
