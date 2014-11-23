@@ -61,6 +61,11 @@ io.on('connection', function(socket){
   socket.on('register', function(data){
     sessionAndroid[data.sessionId] = socket;
   });
+  socket.emit('touch', {
+    x: 130,
+    y: 150,
+    event: "CLICK"
+  })
 });
 
 var port = Number(process.env.PORT || 5000);
@@ -74,7 +79,11 @@ app.get('/', function(req, res) {
 
 app.post('/upload', function(req, res) {
   res.send('OK!');
-  sessionBrowsers[req.body.sessionId].emit('refresh', { image: req.body.image });
+  sessionBrowsers[req.body.sessionId].emit('refresh', { 
+    image: req.body.image,
+    screenWidth: req.body.screenWidth,
+    screenHeight: req.body.screenHeight
+  });
 });
 
 app.get('/image', function(req, res){

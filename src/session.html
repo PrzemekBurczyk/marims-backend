@@ -2,7 +2,7 @@
     <head>
         <script src='socket.io/socket.io.js'></script>
         <script>
-            var refresh = function(image) {
+            var refresh = function(image, screenWidth, screenHeight) {
                 if(image !== null && image !== undefined) {
                     var screen = document.getElementById('screen');
                     screen.addEventListener('click', function(event, pos){
@@ -16,13 +16,13 @@
             };
 
             console.log('Connecting to websocket at url ' + 'http://' + location.host + '/browser' + location.pathname);
-            
+
             var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 
             socket.on('refresh', function(data){
                 console.log('Refreshing');
                 if(data !== null && data !== undefined){
-                    refresh(data.image);
+                    refresh(data.image, data.screenWidth, data.screenHeight);
                 }
             });
 
