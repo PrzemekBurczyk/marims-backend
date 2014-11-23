@@ -14,10 +14,12 @@ var androidEndpoint = '/android';
 var browserEndpoint = '/browser';
 
 var sessionBrowsers = {};
+var sessionAndroid = {};
 
 var browsers = io.of(browserEndpoint);
 browsers.on('connection', function(socket){
   console.log('Browser connected');
+
   //generate new session id here
   var sessionId = '123e4567-e89b-12d3-a456-426655440000';
   var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
@@ -33,10 +35,11 @@ browsers.on('connection', function(socket){
   });
 
   //creating android websocket listener for generated session
-  io.of(androidWebsocketUrl).on('connection', function(socket){
-    console.log('Android connected to session ' + sessionId);
-    socket.emit('start', 'android');
-  });
+  // sessionAndroid[sessionId] = io.of(androidWebsocketUrl);
+  // sessionAndroid[sessionId].on('connection', function(socket){
+  //   console.log('Android connected to session ' + sessionId);
+  //   socket.emit('start', 'android');
+  // });
 
   //creating browser http listener for generated session
   app.get('/' + sessionId, function(req, res) {
@@ -57,7 +60,7 @@ io.on('connection', function(socket){
   console.log('Someone connected');
   socket.emit('start', 'anyone');
   socket.on('image', function(data){
-    socket.emit('image', 'image send success');
+    // socket.emit('image', 'image send success');
     sessionBrowsers[data.sessionId].emit('debug', data);
     // sessionBrowsers[data.sessionId].emit('refresh', { image: data.imageData });
   });

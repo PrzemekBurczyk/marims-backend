@@ -16,6 +16,7 @@
             };
 
             console.log('Connecting to websocket at url ' + 'http://' + location.host + '/browser' + location.pathname);
+            
             var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 
             socket.on('refresh', function(data){
@@ -23,6 +24,10 @@
                 if(data !== null && data !== undefined){
                     refresh(data.image);
                 }
+            });
+
+            socket.on('debug', function(data){
+                console.log(data);
             });
 
             socket.on('start', function(data){

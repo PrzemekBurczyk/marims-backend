@@ -9,6 +9,10 @@
             socket.on('debug', function(data){
                 console.log(data);
             });
+            
+            socket.on('start', function(data){
+                console.log('Starting: ' + data);
+            });
 
             socket.on('sessionGenerated', function(sessionData){
                 console.log(sessionData.sessionId);
