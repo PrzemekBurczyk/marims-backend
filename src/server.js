@@ -59,13 +59,15 @@ browsers.on('connection', function(socket){
 io.on('connection', function(socket){
   //Android connected
   socket.on('register', function(data){
-    sessionAndroid[data.sessionId] = socket;
+    sessionAndroid[data[0].sessionId] = socket;
+    socket.emit('start', 'android');
+    socket.emit('touch', {
+      x: 130,
+      y: 150,
+      event: "CLICK"
+    });
   });
-  socket.emit('touch', {
-    x: 130,
-    y: 150,
-    event: "CLICK"
-  })
+  
 });
 
 var port = Number(process.env.PORT || 5000);
