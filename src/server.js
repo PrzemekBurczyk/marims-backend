@@ -55,6 +55,7 @@ io.on('connection', function(socket){
   console.log('Someone connected');
   socket.emit('start', 'anyone');
   socket.on('image', function(data){
+    socket.emit('image', data);
     console.log(data);
   });
 });
