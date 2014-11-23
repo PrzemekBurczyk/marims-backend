@@ -20,7 +20,7 @@ browsers.on('connection', function(socket){
   var sessionId = '123e4567-e89b-12d3-a456-426655440000';
   var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
   var androidAppUrl = 'marims://' + androidWebsocketUrl;
-  var browserUrl = '/' + sessionId;
+  var browserUrl = sessionId;
   var browserWebsocketUrl = browserEndpoint + '/' + sessionId;
 
   //creating browser websocket listener for generated session
