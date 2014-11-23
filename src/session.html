@@ -3,14 +3,11 @@
         <script src='socket.io/socket.io.js'></script>
         <script>
             var refresh = function(image, screenWidth, screenHeight) {
+
                 if(image !== null && image !== undefined) {
                     var screen = document.getElementById('screen');
-                    screen.addEventListener('click', function(event, pos){
-                        if(event.pageX != 0 && event.pageY != 0) {
-                            //Math.floor(event.offsetX/screen.width*data.width)
-                            //Math.floor(event.offsetY/screen.height*data.height)
-                        }
-                    });
+                    this.init(screenWidth, screenHeight);
+
                     screen.src = 'data:image/jpg;base64,' + image;
                 }
             };
@@ -29,14 +26,63 @@
             socket.on('debug', function(data){
                 console.log(data);
             });
-
-            socket.on('start', function(data){
-                console.log('Starting: ' + data);
-            });
+			
+			var gestureModeActive = false;
+			
+			var refreshImageState = function(imageWidth, imageHeight) {
+				var screen = document.getElementById('screen');
+				screen.onclick = function(event){
+					if(event.pageX != 0 && event.pageY != 0) {
+						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
+						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);
+						socket.emit('click', {xPos: x, yPos: y});
+					}
+				};
+				screen.oncontextmenu = function(event) {
+					if(event.pageX != 0 && event.pageY != 0) {
+						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
+						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);
+						socket.emit('rightClick', {xPos: x, yPos: y});
+						return false;
+					}
+				};
+				screen.ondragstart = function(event){
+					if(event.pageX != 0 && event.pageY != 0) {
+						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
+						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);				
+						socket.emit('dragStart', {xPos: x, yPos: y});
+						gestureModeActive = true;
+					}
+					return false; 
+				};
+				screen.onmousemove = function(event){
+					if(gestureModeActive && event.pageX != 0 && event.pageY != 0) {
+						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
+						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);				
+						socket.emit('mouseMove', {xPos: x, yPos: y});
+					}
+				};
+				screen.onmouseout = function(event){
+					if (gestureModeActive){
+						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
+						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);
+						socket.emit('mouseUp', {xPos: x, yPos: y});
+						gestureModeActive = false;
+					}
+				};
+				screen.onmouseup = function(event){
+					if (gestureModeActive){
+						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
+						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);
+						socket.emit('mouseUp', {xPos: x, yPos: y});
+						gestureModeActive = false;
+					}
+				};
+			}
         </script>
     </head>
 
     <body>
-        <img id="screen" src="/image" style="height:90%"/>
+        <img id="screen" src="/image" style="height:90%;margin:0px auto;display:block"/>
     </body>
 </html>

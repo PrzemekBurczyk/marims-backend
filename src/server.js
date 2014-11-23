@@ -3,8 +3,10 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
 var app = express();
+app.use(express.static('./lib'));
 var http = require('http').Server(app);
 var io = require('socket.io').listen(http);
+var uuid = require('node-uuid');
 
 var imgPath = 'uploads/image';
 
@@ -21,7 +23,9 @@ browsers.on('connection', function(socket){
   console.log('Browser connected');
 
   //generate new session id here
+  // var sessionId = uuid.v4();
   var sessionId = '123e4567-e89b-12d3-a456-426655440000';
+
   var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
   var androidAppUrl = 'marims://' + androidWebsocketUrl;
   var browserUrl = sessionId;
@@ -31,7 +35,53 @@ browsers.on('connection', function(socket){
   sessionBrowsers[sessionId] = io.of(browserWebsocketUrl);
   sessionBrowsers[sessionId].on('connection', function(socket){
     console.log('Browser connected to session ' + sessionId);
-    socket.emit('start', 'browser');
+
+  	socket.on('click', function(data){
+  		console.log("clicked: x=" + data.xPos + " y=" + data.yPos);
+      androidSocket = sessionAndroid[sessionId];
+      androidSocket.emit('motionEvent', {
+        x: data.xPos,
+        y: data.yPos,
+        event: "CLICK"
+      });
+  	});
+  	socket.on('rightClick', function(data){
+  		console.log("right clicked: x=" + data.xPos + " y=" + data.yPos);
+      androidSocket = sessionAndroid[sessionId];
+      androidSocket.emit('motionEvent', {
+        x: data.xPos,
+        y: data.yPos,
+        event: "RIGHT_CLICK"
+      });
+  	});
+  	socket.on('dragStart', function(data){
+  		console.log("drag started: x=" + data.xPos + " y=" + data.yPos);
+      androidSocket = sessionAndroid[sessionId];
+      androidSocket.emit('motionEvent', {
+        x: data.xPos,
+        y: data.yPos,
+        event: "DRAG_START"
+      });
+  	});
+  	socket.on('mouseMove', function(data){
+  		console.log("drag position: x=" + data.xPos + " y=" + data.yPos);
+      androidSocket = sessionAndroid[sessionId];
+      androidSocket.emit('motionEvent', {
+        x: data.xPos,
+        y: data.yPos,
+        event: "MOUSE_MOVE"
+      });
+  	});
+  	socket.on('mouseUp', function(data){
+  		console.log("drag end: x=" + data.xPos + " y=" + data.yPos);
+      androidSocket = sessionAndroid[sessionId];
+      androidSocket.emit('motionEvent', {
+        x: data.xPos,
+        y: data.yPos,
+        event: "MOUSE_UP"
+      });
+  	});
+
   });
 
   //creating android websocket listener for generated session
@@ -60,11 +110,6 @@ io.on('connection', function(socket){
   //Android connected
   socket.on('register', function(data){
     sessionAndroid[data.sessionId] = socket;
-    socket.emit('touch', {
-      x: "130",
-      y: "150",
-      event: "CLICK"
-    });
   });
   
 });
