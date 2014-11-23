@@ -59,13 +59,12 @@ browsers.on('connection', function(socket){
 io.on('connection', function(socket){
   //Android connected
   socket.on('register', function(data){
-    sessionBrowsers['123e4567-e89b-12d3-a456-426655440000'].emit('debug', data);
-    // sessionAndroid[data[0].sessionId] = socket;
-    // socket.emit('touch', {
-    //   x: "130",
-    //   y: "150",
-    //   event: "CLICK"
-    // });
+    sessionAndroid[data.sessionId] = socket;
+    socket.emit('touch', {
+      x: "130",
+      y: "150",
+      event: "CLICK"
+    });
   });
   
 });
@@ -80,7 +79,7 @@ app.get('/', function(req, res) {
 });
 
 app.post('/upload', function(req, res) {
-  res.send('OK!');
+  res.send('OK');
   sessionBrowsers[req.body.sessionId].emit('refresh', { 
     image: req.body.image,
     screenWidth: req.body.screenWidth,
