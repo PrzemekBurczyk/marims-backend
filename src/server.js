@@ -27,7 +27,7 @@ browsers.on('connection', function(socket){
 
   //creating browser websocket listener for generated session
   sessionBrowsers[sessionId] = io.of(browserWebsocketUrl);
-  sessionBrowsers.on('connection', function(socket){
+  sessionBrowsers[sessionId].on('connection', function(socket){
     console.log('Browser connected to session ' + sessionId);
     socket.emit('start', 'browser');
   });
