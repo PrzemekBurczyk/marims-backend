@@ -31,6 +31,9 @@ browsers.on('connection', function(socket){
   sessionBrowsers.on('connection', function(socket){
     console.log('Browser connected to session ' + sessionId);
     socket.emit('start');
+	socket.on('click', function(data){
+		console.log("clicked: x=" + data.xPos + " y=" + data.yPos);
+	  });
   });
 
   //creating android websocket listener for generated session

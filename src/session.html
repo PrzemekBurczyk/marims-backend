@@ -2,6 +2,9 @@
     <head>
         <script src='socket.io/socket.io.js'></script>
         <script>
+			console.log('Connecting to websocket at url ' + location.host + '/browser' + location.pathname);
+            var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
+		
 			var imageWidth = 500;
 			var imageHeight = 700;
 		
@@ -10,8 +13,10 @@
                     var screen = document.getElementById('screen');
                     screen.onclick = function(event){
 						if(event.pageX != 0 && event.pageY != 0) {
-							console.log(Math.floor(event.offsetX/event.srcElement.width*imageWidth),
-								Math.floor(event.offsetY/event.srcElement.height*imageHeight));
+							var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
+							var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);
+							console.log("click");
+							socket.emit('click', {xPos: x, yPos: y});
 						}
                     };
 					screen.ondragstart = function(event){ 
@@ -20,9 +25,6 @@
                     screen.src = 'data:image/jpg;base64,' + image;
                 }
             };
-
-            console.log('Connecting to websocket at url ' + location.host + '/browser' + location.pathname);
-            var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 
             socket.on('refresh', function(data){
                 console.log('Refreshing');
@@ -34,10 +36,24 @@
             socket.on('start', function(){
                 console.log('Starting');
             });
+			
+			this.init = function() {
+				var screen = document.getElementById('screen');
+				screen.onclick = function(event){
+					if(event.pageX != 0 && event.pageY != 0) {
+						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
+						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);
+						socket.emit('click', {xPos: x, yPos: y});
+					}
+				};
+				screen.ondragstart = function(event){ 
+					return false; 
+				};
+			}
         </script>
     </head>
 
-    <body>
+    <body onLoad="init()">
         <img id="screen" src="/image" style="height:90%;margin:0px auto;display:block"/>
     </body>
 </html>
