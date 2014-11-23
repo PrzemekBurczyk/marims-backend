@@ -15,7 +15,7 @@
                 }
             };
 
-            console.log('Connecting to websocket at url ' + location.host + '/browser' + location.pathname);
+            console.log('Connecting to websocket at url ' + 'http://' + location.host + '/browser' + location.pathname);
             var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 
             socket.on('refresh', function(data){
@@ -25,8 +25,8 @@
                 }
             });
 
-            socket.on('start', function(){
-                console.log('Starting');
+            socket.on('start', function(data){
+                console.log(data);
             });
         </script>
     </head>

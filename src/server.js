@@ -27,13 +27,13 @@ browsers.on('connection', function(socket){
   var sessionBrowsers = io.of(browserWebsocketUrl);
   sessionBrowsers.on('connection', function(socket){
     console.log('Browser connected to session ' + sessionId);
-    socket.emit('start');
+    socket.emit('browser start');
   });
 
   //creating android websocket listener for generated session
   io.of(androidWebsocketUrl).on('connection', function(socket){
     console.log('Android connected to session ' + sessionId);
-    socket.emit('start');
+    socket.emit('android start');
   });
 
   //creating browser http listener for generated session
@@ -52,7 +52,8 @@ browsers.on('connection', function(socket){
 });
 
 io.on('connection', function(socket){
-  //Someone connected
+  console.log('Someone connected');
+  socket.emit('anyone start');
 });
 
 var port = Number(process.env.PORT || 5000);
