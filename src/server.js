@@ -54,6 +54,9 @@ browsers.on('connection', function(socket){
 io.on('connection', function(socket){
   console.log('Someone connected');
   socket.emit('start', 'anyone');
+  socket.on('image', function(data){
+    console.log(data);
+  });
 });
 
 var port = Number(process.env.PORT || 5000);
