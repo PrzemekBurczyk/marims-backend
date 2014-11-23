@@ -3,7 +3,7 @@
         <script src='socket.io/socket.io.js'></script>
         <script>
             var qrLink;
-            var socket = io.connect('http://localhost/browser');
+            var socket = io.connect('http://localhost/browser/');
 
             socket.on('sessionGenerated', function(sessionData){
                 console.log(sessionData.sessionId);
