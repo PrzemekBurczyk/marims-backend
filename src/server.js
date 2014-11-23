@@ -15,13 +15,14 @@ var browserEndpoint = '/browser';
 
 var sessionBrowsers = {};
 var sessionAndroid = {};
+var sessionId = '123e4567-e89b-12d3-a456-426655440000';
 
 var browsers = io.of(browserEndpoint);
 browsers.on('connection', function(socket){
   console.log('Browser connected');
 
   //generate new session id here
-  var sessionId = '123e4567-e89b-12d3-a456-426655440000';
+  
   var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
   var androidAppUrl = 'marims://' + androidWebsocketUrl;
   var browserUrl = sessionId;
@@ -61,7 +62,7 @@ io.on('connection', function(socket){
   socket.emit('start', 'anyone');
   socket.on('image', function(data){
     // socket.emit('image', 'image send success');
-    sessionBrowsers[data.sessionId].emit('debug', data);
+    sessionBrowsers[sessionId].emit('debug', data);
     // sessionBrowsers[data.sessionId].emit('refresh', { image: data.imageData });
   });
 });
