@@ -4,7 +4,14 @@
         <script>
             var refresh = function(image) {
                 if(image !== null && image !== undefined) {
-                    document.getElementById('screen').setAttribute('src', 'data:image/jpg;base64,' + image);
+                    var screen = document.getElementById('screen');
+                    screen.addEventListener('click', function(event, pos){
+                        if(event.pageX != 0 && event.pageY != 0) {
+                            //Math.floor(event.offsetX/screen.width*data.width)
+                            //Math.floor(event.offsetY/screen.height*data.height)
+                        }
+                    });
+                    screen.src = 'data:image/jpg;base64,' + image;
                 }
             };
 
