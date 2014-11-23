@@ -13,6 +13,8 @@ app.use(bodyParser({ limit: '5mb'}));
 var androidEndpoint = '/android';
 var browserEndpoint = '/browser';
 
+var sessionBrowsers = {};
+
 var browsers = io.of(browserEndpoint);
 browsers.on('connection', function(socket){
   console.log('Browser connected');
@@ -24,7 +26,7 @@ browsers.on('connection', function(socket){
   var browserWebsocketUrl = browserEndpoint + '/' + sessionId;
 
   //creating browser websocket listener for generated session
-  var sessionBrowsers = io.of(browserWebsocketUrl);
+  sessionBrowsers[sessionId] = io.of(browserWebsocketUrl);
   sessionBrowsers.on('connection', function(socket){
     console.log('Browser connected to session ' + sessionId);
     socket.emit('start', 'browser');
@@ -55,8 +57,8 @@ io.on('connection', function(socket){
   console.log('Someone connected');
   socket.emit('start', 'anyone');
   socket.on('image', function(data){
-    socket.emit('image', data);
-    console.log(data);
+    socket.emit('image', 'image send success');
+    sessionBrowsers[data.sessionId].emit('refresh', { image: data.imageData });
   });
 });
 
