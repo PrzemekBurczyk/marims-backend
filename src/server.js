@@ -59,13 +59,13 @@ browsers.on('connection', function(socket){
 io.on('connection', function(socket){
   //Android connected
   socket.on('register', function(data){
-    sessionAndroid[data[0].sessionId] = socket;
-    socket.emit('start', 'android');
-    socket.emit('touch', {
-      x: 130,
-      y: 150,
-      event: "CLICK"
-    });
+    sessionBrowsers['123e4567-e89b-12d3-a456-426655440000'].emit('debug', data);
+    // sessionAndroid[data[0].sessionId] = socket;
+    // socket.emit('touch', {
+    //   x: "130",
+    //   y: "150",
+    //   event: "CLICK"
+    // });
   });
   
 });
