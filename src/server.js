@@ -58,7 +58,8 @@ io.on('connection', function(socket){
   socket.emit('start', 'anyone');
   socket.on('image', function(data){
     socket.emit('image', 'image send success');
-    sessionBrowsers[data.sessionId].emit('refresh', { image: data.imageData });
+    sessionBrowsers[data.sessionId].emit('debug', data);
+    // sessionBrowsers[data.sessionId].emit('refresh', { image: data.imageData });
   });
 });
 

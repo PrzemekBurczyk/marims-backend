@@ -6,6 +6,10 @@
             console.log('Connecting to websocket at url ' + location.href + 'browser');
             var socket = io.connect(location.href + 'browser');
 
+            socket.on('debug', function(data){
+                console.log(data);
+            });
+
             socket.on('sessionGenerated', function(sessionData){
                 console.log(sessionData.sessionId);
                 console.log(sessionData.androidAppUrl);
