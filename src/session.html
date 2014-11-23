@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <script src='socket.io/socket.io.js'></script>
+        <script>
+            var refresh = function(image) {
+                if(image !== null && image !== undefined) {
+                    document.getElementById('screen').setAttribute('src', 'data:image/jpg;base64,' + image);
+                }
+            };
+
+            var socket = io.connect('http://localhost/browser' + location.pathname);
+
+            socket.on('refresh', function(data){
+                console.log('Refreshing');
+                if(data !== null && data !== undefined){
+                    refresh(data.image);
+                }
+            });
+
+            socket.on('start', function(){
+                console.log('Starting');
+            });
+        </script>
+    </head>
+
+    <body>
+        <img id="screen" src="/image" style="height:90%"/>
+    </body>
+</html>

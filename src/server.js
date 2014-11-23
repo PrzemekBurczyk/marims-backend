@@ -10,18 +10,49 @@ var imgPath = 'uploads/image';
 
 app.use(bodyParser({ limit: '5mb'}));
 
-var sockets = [];
+var androidEndpoint = '/android';
+var browserEndpoint = '/browser';
+
+var browsers = io.of(browserEndpoint);
+browsers.on('connection', function(socket){
+  console.log('Browser connected');
+  //generate new session id here
+  var sessionId = '123e4567-e89b-12d3-a456-426655440000';
+  var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
+  var androidAppUrl = 'marims://' + androidWebsocketUrl;
+  var browserUrl = '/' + sessionId;
+  var browserWebsocketUrl = browserEndpoint + '/' + sessionId;
+
+  //creating browser websocket listener for generated session
+  var sessionBrowsers = io.of(browserWebsocketUrl);
+  sessionBrowsers.on('connection', function(socket){
+    console.log('Browser connected to session ' + sessionId);
+    socket.emit('start');
+  });
+
+  //creating android websocket listener for generated session
+  io.of(androidWebsocketUrl).on('connection', function(socket){
+    console.log('Android connected to session ' + sessionId);
+    socket.emit('start');
+  });
+
+  //creating browser http listener for generated session
+  app.get('/' + sessionId, function(req, res) {
+    res.sendfile(path.resolve('src/session.html'));
+  });
+
+  //notifying that the session is ready to use
+  socket.emit('sessionGenerated', {
+    sessionId: sessionId,
+    androidAppUrl: androidAppUrl,
+    browserUrl: browserUrl,
+    browserWebsocketUrl: browserWebsocketUrl 
+  });
+
+});
 
 io.on('connection', function(socket){
-  sockets.push(socket);
-  console.log('User connected');
-  socket.emit('start');
-  socket.on('image', function(image){
-	  console.log('got image');
-	  for(i = 0; i < sockets.length; i++){
-	  	sockets[i].emit('refresh', image);
-	  }
-	});
+  //Someone connected
 });
 
 var port = Number(process.env.PORT || 5000);
@@ -29,7 +60,7 @@ http.listen(port, function() {
   console.log(('Listening on ' + port).green);
 });
 
-app.get('/client', function(req, res) {
+app.get('/', function(req, res) {
   res.sendfile(path.resolve('src/index.html'));
 });
 
