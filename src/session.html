@@ -2,11 +2,19 @@
     <head>
         <script src='socket.io/socket.io.js'></script>
         <script>
-            var refresh = function(image, screenWidth, screenHeight) {
+            var lastScreenWidth = 0;
+            var lastScreenHeight = 0;
 
+            var refresh = function(image, screenWidth, screenHeight) {
                 if(image !== null && image !== undefined) {
                     var screen = document.getElementById('screen');
-                    this.init(screenWidth, screenHeight);
+
+                    if(screenWidth !== lastScreenWidth || screenHeight !== lastScreenHeight){
+                        refreshImageState(screenWidth, screenHeight);
+                    }
+
+                    lastScreenWidth = screenWidth;
+                    lastScreenHeight = screenHeight;
 
                     screen.src = 'data:image/jpg;base64,' + image;
                 }
@@ -29,7 +37,7 @@
 			
 			var gestureModeActive = false;
 			
-			this.refreshImageState = function(imageWidth, imageHeight) {
+			var refreshImageState = function(imageWidth, imageHeight) {
 				var screen = document.getElementById('screen');
 				screen.onclick = function(event){
 					if(event.pageX != 0 && event.pageY != 0) {
