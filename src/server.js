@@ -3,8 +3,10 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
 var app = express();
+app.use(express.static('./lib'));
 var http = require('http').Server(app);
 var io = require('socket.io').listen(http);
+var uuid = require('node-uuid');
 
 var imgPath = 'uploads/image';
 
@@ -17,7 +19,8 @@ var browsers = io.of(browserEndpoint);
 browsers.on('connection', function(socket){
   console.log('Browser connected');
   //generate new session id here
-  var sessionId = '123e4567-e89b-12d3-a456-426655440000';
+  var sessionId = uuid.v4();
+
   var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
   var androidAppUrl = 'marims://' + androidWebsocketUrl;
   var browserUrl = sessionId;

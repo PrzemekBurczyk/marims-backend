@@ -2,15 +2,21 @@
     <head>
         <script src='socket.io/socket.io.js'></script>
         <script>
+			var imageWidth = 500;
+			var imageHeight = 700;
+		
             var refresh = function(image) {
                 if(image !== null && image !== undefined) {
                     var screen = document.getElementById('screen');
-                    screen.addEventListener('click', function(event, pos){
-                        if(event.pageX != 0 && event.pageY != 0) {
-                            //Math.floor(event.offsetX/screen.width*data.width)
-                            //Math.floor(event.offsetY/screen.height*data.height)
-                        }
-                    });
+                    screen.onclick = function(event){
+						if(event.pageX != 0 && event.pageY != 0) {
+							console.log(Math.floor(event.offsetX/event.srcElement.width*imageWidth),
+								Math.floor(event.offsetY/event.srcElement.height*imageHeight));
+						}
+                    };
+					screen.ondragstart = function(event){ 
+						return false; 
+					};
                     screen.src = 'data:image/jpg;base64,' + image;
                 }
             };
