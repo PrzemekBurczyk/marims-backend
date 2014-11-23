@@ -33,7 +33,19 @@ browsers.on('connection', function(socket){
     socket.emit('start');
 	socket.on('click', function(data){
 		console.log("clicked: x=" + data.xPos + " y=" + data.yPos);
-	  });
+	});
+	socket.on('rightClick', function(data){
+		console.log("right clicked: x=" + data.xPos + " y=" + data.yPos);
+	});
+	socket.on('dragStart', function(data){
+		console.log("drag started: x=" + data.xPos + " y=" + data.yPos);
+	});
+	socket.on('mouseMove', function(data){
+		console.log("drag position: x=" + data.xPos + " y=" + data.yPos);
+	});
+	socket.on('mouseUp', function(data){
+		console.log("drag end: x=" + data.xPos + " y=" + data.yPos);
+	});
   });
 
   //creating android websocket listener for generated session
