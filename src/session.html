@@ -18,36 +18,43 @@
 			var phoneFrameScreenPercentageOffsetY = phoneFrameScreenOffsetY/phoneFrameImageHeight;
 			
             var refresh = function(image, screenWidth, screenHeight) {
+
                 if(image !== null && image !== undefined) {
                     var screen = document.getElementById('screen');
-                    this.init();
+                    this.init(screenWidth, screenHeight);
 
                     screen.src = 'data:image/jpg;base64,' + image;
                 }
             };
 
+            console.log('Connecting to websocket at url ' + 'http://' + location.host + '/browser' + location.pathname);
+
+            var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
+
             socket.on('refresh', function(data){
                 console.log('Refreshing');
                 if(data !== null && data !== undefined){
-                    refresh(data.image);
+                    refresh(data.image, data.screenWidth, data.screenHeight);
                 }
             });
 
-            socket.on('start', function(){
-                console.log('Starting');
+            socket.on('debug', function(data){
+                console.log(data);
             });
 			
 			var gestureModeActive = false;
 			
 			this.init = function(screenWidth, screenHeight) {			
 				var canvas = document.getElementById("canvas");
-				canvas.height = window.innerHeight*0.9;
-				canvas.width = window.innerHeight*phoneFrameImageWidth/phoneFrameImageHeight;
-				var ctx = canvas.getContext("2d");
-				var img = document.getElementById("phone");
 				
 				var phoneFrameRealHeight = window.innerHeight*0.9;
 				var phoneFrameRealWidth = phoneFrameRealHeight * phoneFrameScreenPercentageHeight * (screenWidth/screenHeight) / phoneFrameScreenPercentageWidth;
+				
+				canvas.height = phoneFrameRealHeight;
+				canvas.width = phoneFrameRealWidth;
+				var ctx = canvas.getContext("2d");
+				var img = document.getElementById("phone");
+				
 				ctx.drawImage(img, 0, 0, phoneFrameRealWidth, phoneFrameRealHeight);
 				
 				var phoneScreenRealHeight = phoneFrameRealHeight * phoneFrameScreenPercentageHeight;
@@ -111,7 +118,7 @@
         </script>
     </head>
 
-    <body id="body" onLoad="init(1, 1)" style="height: 100%;">
+    <body id="body" onLoad="init(2, 3)" style="height: 100%;">
 		<div>
 			<img id="phone" src="phoneFrame.png" hidden/>
 			<img id="view" src="/image" hidden/>
