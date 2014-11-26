@@ -4,11 +4,20 @@
         <script>
 			console.log('Connecting to websocket at url ' + location.host + '/browser' + location.pathname);
             var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
-		
-			var imageWidth = 500;
-			var imageHeight = 700;
-		
-            var refresh = function(image) {
+			
+			var phoneFrameImageWidth = 1690;
+			var phoneFrameImageHeight = 2857;
+			var phoneFrameScreenWidth = 1080;
+			var phoneFrameScreenHeight = 1920;
+			var phoneFrameScreenOffsetX = 304;
+			var phoneFrameScreenOffsetY = 436;
+			
+			var phoneFrameScreenPercentageWidth = phoneFrameScreenWidth/phoneFrameImageWidth;
+			var phoneFrameScreenPercentageHeight = phoneFrameScreenHeight/phoneFrameImageHeight;
+			var phoneFrameScreenPercentageOffsetX = phoneFrameScreenOffsetX/phoneFrameImageWidth;
+			var phoneFrameScreenPercentageOffsetY = phoneFrameScreenOffsetY/phoneFrameImageHeight;
+			
+            var refresh = function(image, screenWidth, screenHeight) {
                 if(image !== null && image !== undefined) {
                     var screen = document.getElementById('screen');
                     this.init();
@@ -30,52 +39,71 @@
 			
 			var gestureModeActive = false;
 			
-			this.init = function() {
-				var screen = document.getElementById('screen');
-				screen.onclick = function(event){
-					if(event.pageX != 0 && event.pageY != 0) {
-						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
-						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);
-						socket.emit('click', {xPos: x, yPos: y});
+			this.init = function(screenWidth, screenHeight) {			
+				var canvas = document.getElementById("canvas");
+				canvas.height = window.innerHeight*0.9;
+				canvas.width = window.innerHeight*phoneFrameImageWidth/phoneFrameImageHeight;
+				var ctx = canvas.getContext("2d");
+				var img = document.getElementById("phone");
+				
+				var phoneFrameRealHeight = window.innerHeight*0.9;
+				var phoneFrameRealWidth = phoneFrameRealHeight * phoneFrameScreenPercentageHeight * (screenWidth/screenHeight) / phoneFrameScreenPercentageWidth;
+				ctx.drawImage(img, 0, 0, phoneFrameRealWidth, phoneFrameRealHeight);
+				
+				var phoneScreenRealHeight = phoneFrameRealHeight * phoneFrameScreenPercentageHeight;
+				var phoneScreenRealWidth = phoneFrameRealWidth * phoneFrameScreenPercentageWidth;
+				var phoneScreenOffsetRealHeight = phoneFrameScreenPercentageOffsetY * phoneFrameRealHeight;
+				var phoneScreenOffsetRealWidth = phoneFrameScreenPercentageOffsetX * phoneFrameRealWidth;
+				var img2 = document.getElementById("view");
+				ctx.drawImage(img2, phoneScreenOffsetRealWidth, phoneScreenOffsetRealHeight, phoneScreenRealWidth, phoneScreenRealHeight);
+			
+				var screen = document.getElementById('canvas');
+				var screenLeftBorder = phoneScreenOffsetRealWidth;
+				var screenRightBorder = phoneScreenOffsetRealWidth + phoneScreenRealWidth;
+				var screenTopBorder = phoneScreenOffsetRealHeight;
+				var screenBottomBorder = phoneScreenOffsetRealHeight + phoneScreenRealHeight;
+				screen.onmousedown = function(event){
+					if(event.pageX !== 0 && event.pageY !== 0) {
+						var screenX = event.offsetX - screenLeftBorder;
+						var screenY = event.offsetY - screenTopBorder;
+						if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >=0 && screenY <= phoneScreenRealHeight) {
+							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
+							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
+							socket.emit('mouseDown', {xPos: x, yPos: y});
+							gestureModeActive = true;
+							isMouseOverScreen = true;
+							console.log('down', x, y);
+						}
 					}
-				};
-				screen.oncontextmenu = function(event) {
-					if(event.pageX != 0 && event.pageY != 0) {
-						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
-						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);
-						socket.emit('rightClick', {xPos: x, yPos: y});
-						return false;
-					}
-				};
-				screen.ondragstart = function(event){
-					if(event.pageX != 0 && event.pageY != 0) {
-						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
-						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);				
-						socket.emit('dragStart', {xPos: x, yPos: y});
-						gestureModeActive = true;
-					}
-					return false; 
 				};
 				screen.onmousemove = function(event){
-					if(gestureModeActive && event.pageX != 0 && event.pageY != 0) {
-						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
-						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);				
-						socket.emit('mouseMove', {xPos: x, yPos: y});
-					}
-				};
-				screen.onmouseout = function(event){
-					if (gestureModeActive){
-						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
-						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);
-						socket.emit('mouseUp', {xPos: x, yPos: y});
-						gestureModeActive = false;
+					if(gestureModeActive === true && event.pageX !== 0 && event.pageY !== 0) {
+						var screenX = event.offsetX - screenLeftBorder;
+						var screenY = event.offsetY - screenTopBorder;
+						if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >=0 && screenY <= phoneScreenRealHeight) {
+							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
+							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
+							socket.emit('mouseMove', {xPos: x, yPos: y});
+							console.log('move', x, y);
+						} else if (screenX < 0 || screenX > phoneScreenRealWidth || screenY < 0 || screenY > phoneScreenRealHeight){
+							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
+							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
+							socket.emit('mouseUp', {xPos: x, yPos: y});
+							gestureModeActive = false;
+							console.log('out', x, y);
+						}
 					}
 				};
 				screen.onmouseup = function(event){
 					if (gestureModeActive){
-						var x = Math.floor(event.offsetX/event.srcElement.width*imageWidth);
-						var y = Math.floor(event.offsetY/event.srcElement.height*imageHeight);
-						socket.emit('mouseUp', {xPos: x, yPos: y});
+						var screenX = event.offsetX - screenLeftBorder;
+						var screenY = event.offsetY - screenTopBorder;
+						if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >=0 && screenY <= phoneScreenRealHeight) {
+							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
+							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
+							socket.emit('mouseUp', {xPos: x, yPos: y});
+							console.log('up', x, y);
+						}
 						gestureModeActive = false;
 					}
 				};
@@ -83,7 +111,11 @@
         </script>
     </head>
 
-    <body onLoad="init()">
-        <img id="screen" src="/image" style="height:90%;margin:0px auto;display:block"/>
+    <body id="body" onLoad="init(1, 1)" style="height: 100%;">
+		<div>
+			<img id="phone" src="phoneFrame.png" hidden/>
+			<img id="view" src="/image" hidden/>
+			<canvas id="canvas" width="700" height="700"></canvas>
+		</div>
     </body>
 </html>
