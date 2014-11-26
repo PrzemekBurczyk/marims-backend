@@ -21,7 +21,7 @@
 
                 if(image !== null && image !== undefined) {
                     var screen = document.getElementById('screen');
-                    this.init(screenWidth, screenHeight);
+                    this.init(image, screenWidth, screenHeight);
 
                     screen.src = 'data:image/jpg;base64,' + image;
                 }
@@ -44,7 +44,7 @@
 			
 			var gestureModeActive = false;
 			
-			this.init = function(screenWidth, screenHeight) {			
+			this.init = function(image, screenWidth, screenHeight) {			
 				var canvas = document.getElementById("canvas");
 				
 				var phoneFrameRealHeight = window.innerHeight*0.9;
@@ -62,8 +62,12 @@
 				var phoneScreenOffsetRealHeight = phoneFrameScreenPercentageOffsetY * phoneFrameRealHeight;
 				var phoneScreenOffsetRealWidth = phoneFrameScreenPercentageOffsetX * phoneFrameRealWidth;
 				var img2 = document.getElementById("view");
+				if (image !== null && image !== undefined) {
+					img2 = document.createElement("img");
+					img2.src = "url(" + image + ")";
+				}
 				ctx.drawImage(img2, phoneScreenOffsetRealWidth, phoneScreenOffsetRealHeight, phoneScreenRealWidth, phoneScreenRealHeight);
-			
+				
 				var screen = document.getElementById('canvas');
 				var screenLeftBorder = phoneScreenOffsetRealWidth;
 				var screenRightBorder = phoneScreenOffsetRealWidth + phoneScreenRealWidth;
@@ -118,7 +122,7 @@
         </script>
     </head>
 
-    <body id="body" onLoad="init(2, 3)" style="height: 100%;">
+    <body id="body" onLoad="init(null, 2, 3)" style="height: 100%;">
 		<div>
 			<img id="phone" src="phoneFrame.png" hidden/>
 			<img id="view" src="/image" hidden/>
