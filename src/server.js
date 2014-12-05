@@ -37,34 +37,37 @@ browsers.on('connection', function(socket){
     console.log('Browser connected to session ' + sessionId);
 
   	socket.on('mouseDown', function(data){
-  	  console.log("mouseDown: x=" + data.xPos + " y=" + data.yPos);
+  	  console.log("mouseDown: x=" + data.xPos + " y=" + data.yPos + " t=" + data.time);
       androidSocket = sessionAndroid[sessionId];
       if(androidSocket !== undefined && androidSocket !== null){
         androidSocket.emit('motionEvent', {
           x: data.xPos,
           y: data.yPos,
+          time: data.time,
           event: "MOUSE_DOWN"
         });
       }
   	});
   	socket.on('mouseMove', function(data){
-  	  console.log("mouseMove: x=" + data.xPos + " y=" + data.yPos);
+  	  console.log("mouseMove: x=" + data.xPos + " y=" + data.yPos + " t=" + data.time);
       androidSocket = sessionAndroid[sessionId];
       if(androidSocket !== undefined && androidSocket !== null){
         androidSocket.emit('motionEvent', {
           x: data.xPos,
           y: data.yPos,
+          time: data.time,
           event: "MOUSE_MOVE"
         });
       }
   	});
   	socket.on('mouseUp', function(data){
-  	  console.log("mouseUp: x=" + data.xPos + " y=" + data.yPos);
+  	  console.log("mouseUp: x=" + data.xPos + " y=" + data.yPos + " t=" + data.time);
       androidSocket = sessionAndroid[sessionId];
       if(androidSocket !== undefined && androidSocket !== null){
         androidSocket.emit('motionEvent', {
           x: data.xPos,
           y: data.yPos,
+          time: data.time,
           event: "MOUSE_UP"
         });
       }
