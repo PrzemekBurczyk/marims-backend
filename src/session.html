@@ -65,7 +65,7 @@
 				var img2 = document.getElementById("view");
 				if (image !== null && image !== undefined) {
 					img2 = document.createElement("img");
-					img2.src = "url(" + image + ")";
+					img2.src = 'data:image/jpg;base64,' + image;
 				}
 				ctx.drawImage(img2, phoneScreenOffsetRealWidth, phoneScreenOffsetRealHeight, phoneScreenRealWidth, phoneScreenRealHeight);
 				
