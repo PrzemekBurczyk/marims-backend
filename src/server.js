@@ -36,50 +36,38 @@ browsers.on('connection', function(socket){
   sessionBrowsers[sessionId].on('connection', function(socket){
     console.log('Browser connected to session ' + sessionId);
 
-  	socket.on('click', function(data){
-  		console.log("clicked: x=" + data.xPos + " y=" + data.yPos);
+  	socket.on('mouseDown', function(data){
+  	  console.log("mouseDown: x=" + data.xPos + " y=" + data.yPos);
       androidSocket = sessionAndroid[sessionId];
-      androidSocket.emit('motionEvent', {
-        x: data.xPos,
-        y: data.yPos,
-        event: "CLICK"
-      });
-  	});
-  	socket.on('rightClick', function(data){
-  		console.log("right clicked: x=" + data.xPos + " y=" + data.yPos);
-      androidSocket = sessionAndroid[sessionId];
-      androidSocket.emit('motionEvent', {
-        x: data.xPos,
-        y: data.yPos,
-        event: "RIGHT_CLICK"
-      });
-  	});
-  	socket.on('dragStart', function(data){
-  		console.log("drag started: x=" + data.xPos + " y=" + data.yPos);
-      androidSocket = sessionAndroid[sessionId];
-      androidSocket.emit('motionEvent', {
-        x: data.xPos,
-        y: data.yPos,
-        event: "DRAG_START"
-      });
+      if(androidSocket !== undefined && androidSocket !== null){
+        androidSocket.emit('motionEvent', {
+          x: data.xPos,
+          y: data.yPos,
+          event: "MOUSE_DOWN"
+        });
+      }
   	});
   	socket.on('mouseMove', function(data){
-  		console.log("drag position: x=" + data.xPos + " y=" + data.yPos);
+  	  console.log("mouseMove: x=" + data.xPos + " y=" + data.yPos);
       androidSocket = sessionAndroid[sessionId];
-      androidSocket.emit('motionEvent', {
-        x: data.xPos,
-        y: data.yPos,
-        event: "MOUSE_MOVE"
-      });
+      if(androidSocket !== undefined && androidSocket !== null){
+        androidSocket.emit('motionEvent', {
+          x: data.xPos,
+          y: data.yPos,
+          event: "MOUSE_MOVE"
+        });
+      }
   	});
   	socket.on('mouseUp', function(data){
-  		console.log("drag end: x=" + data.xPos + " y=" + data.yPos);
+  	  console.log("mouseUp: x=" + data.xPos + " y=" + data.yPos);
       androidSocket = sessionAndroid[sessionId];
-      androidSocket.emit('motionEvent', {
-        x: data.xPos,
-        y: data.yPos,
-        event: "MOUSE_UP"
-      });
+      if(androidSocket !== undefined && androidSocket !== null){
+        androidSocket.emit('motionEvent', {
+          x: data.xPos,
+          y: data.yPos,
+          event: "MOUSE_UP"
+        });
+      }
   	});
 
   });
