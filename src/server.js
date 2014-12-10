@@ -1,4 +1,5 @@
 require('colors');
+var dgram = require('dgram');
 var express = require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
@@ -126,3 +127,21 @@ app.post('/upload', function(req, res) {
 app.get('/image', function(req, res){
   res.sendfile(path.resolve(imgPath));
 });
+
+var udpSocket = dgram.createSocket('udp4');
+
+udpSocket.on('error', function(error){
+  console.log('udp error: ' + error.stack);
+  udpSocket.close();
+});
+
+udpSocket.on('listening', function(){
+  var address = udpSocket.address();
+  console.log('udp listening: ' + address.address + ':' + address.port);
+});
+
+udpSocket.on('message', function(msg, rinfo){
+  console.log('udp message: ' + msg[0] + '/' + msg[1] + ' from: ' + rinfo.address + ":" + rinfo.port);
+});
+
+udpSocket.bind(port);
