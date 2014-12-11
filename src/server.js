@@ -6,7 +6,7 @@ var path = require('path');
 var app = express();
 app.use(express.static('./lib'));
 var http = require('http').Server(app);
-var io = require('socket.io').listen(http);
+var io = require('socket.io').listen(http, { log: false });
 var uuid = require('node-uuid');
 
 var imgPath = 'uploads/image';
@@ -140,8 +140,60 @@ udpSocket.on('listening', function(){
   console.log('udp listening: ' + address.address + ':' + address.port);
 });
 
+buffer = {};
+
 udpSocket.on('message', function(msg, rinfo){
-  console.log('udp message: ' + msg[0] + '/' + msg[1] + ' from: ' + rinfo.address + ":" + rinfo.port);
+  var screenshotId = msg[2];
+  var payloadId = msg[0];
+  var payloadCount = msg[1];
+  var sessionId = msg.toString('ascii', 3, 39);
+  // console.log('udp message from session: ' + sessionId + ' screenshotId: ' + screenshotId + " -> " + payloadId + '/' + payloadCount + ' from: ' + rinfo.address + ":" + rinfo.port);
+  if(payloadCount > 1){
+    var payload = msg.slice(39);
+    if(buffer[sessionId] === undefined){
+      buffer[sessionId] = { 
+        lastScreenshotId: screenshotId,
+        payloads: new Array(payloadCount)
+      };
+      buffer[sessionId].payloads[payloadId - 1] = payload;
+    } else {
+      var lastScreenshotId = buffer[sessionId].lastScreenshotId;
+      if(screenshotId === lastScreenshotId){
+        buffer[sessionId].payloads[payloadId - 1] = payload;
+        var haveCompleteScreenshot = true;
+        for(var i = 0; i < payloadCount; i++){
+          if(buffer[sessionId].payloads[i] === undefined){
+            haveCompleteScreenshot = false;
+          }
+        }
+        if(haveCompleteScreenshot === true){
+          try {
+          var data = JSON.parse(Buffer.concat(buffer[sessionId].payloads));
+          } catch(err) {
+            console.log(err);
+          }
+          sessionBrowsers[sessionId].emit('refresh', { 
+            image: data.image,
+            screenWidth: data.screenWidth,
+            screenHeight: data.screenHeight
+          });
+        }
+      } else if(screenshotId > lastScreenshotId || lastScreenshotId - screenshotId > 100){
+        buffer[sessionId] = { 
+          lastScreenshotId: screenshotId,
+          payloads: new Array(payloadCount)
+        };
+        buffer[sessionId].payloads[payloadId - 1] = payload;
+      }
+    }
+  } else if(payloadCount === 1) {
+    var data = JSON.parse(msg.slice(39));
+    sessionBrowsers[sessionId].emit('refresh', { 
+      image: data.image,
+      screenWidth: data.screenWidth,
+      screenHeight: data.screenHeight
+    });
+  }
 });
 
 udpSocket.bind(port);
