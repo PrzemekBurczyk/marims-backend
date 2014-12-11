@@ -196,4 +196,4 @@ udpSocket.on('message', function(msg, rinfo){
   }
 });
 
-udpSocket.bind(port);
+udpSocket.bind(6666);
