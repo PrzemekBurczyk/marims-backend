@@ -1,0 +1,6 @@
+.grad {
+  background: -webkit-radial-gradient(#848481 5%, #757573 15%, #585856 60%); /* Safari 5.1-6.0 */
+  background: -o-radial-gradient(#848481 5%, #757573 15%, #585856 60%); /* For Opera 11.6-12.0 */
+  background: -moz-radial-gradient(#848481 5%, #757573 15%, #585856 60%); /* For Firefox 3.6-15 */
+  background: radial-gradient(#848481 5%, #757573 15%, #585856 60%); /* Standard syntax */
+}
