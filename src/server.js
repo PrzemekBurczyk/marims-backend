@@ -43,6 +43,30 @@ browsers.on('connection', function(socket){
       console.log('Browser connected to session ' + sessionId);
     }
 
+    socket.on('key', function(data){
+      if(DEBUG){
+        console.log("key: text=" + data.text);
+      }
+      androidSocket = sessionAndroid[sessionId];
+      if(androidSocket !== undefined && androidSocket !== null){
+        androidSocket.emit('keyEvent', {
+          text: data.text
+        });
+      }
+    });
+
+    socket.on('specialKey', function(data){
+      if(DEBUG){
+        console.log("specialKey: name=" + data.name);
+      }
+      androidSocket = sessionAndroid[sessionId];
+      if(androidSocket !== undefined && androidSocket !== null){
+        androidSocket.emit('specialKeyEvent', {
+          name: data.name
+        });
+      }
+    });
+
   	socket.on('mouseDown', function(data){
       if(DEBUG){
         console.log("mouseDown: x=" + data.xPos + " y=" + data.yPos + " t=" + data.time);
