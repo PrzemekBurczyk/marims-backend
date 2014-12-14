@@ -4,3 +4,7 @@
   background: -moz-radial-gradient(#848481 5%, #757573 15%, #585856 60%); /* For Firefox 3.6-15 */
   background: radial-gradient(#848481 5%, #757573 15%, #585856 60%); /* Standard syntax */
 }
+
+.auto-container {
+	height: calc(100% - 50px);
+}

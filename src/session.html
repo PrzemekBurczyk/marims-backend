@@ -2,17 +2,26 @@
     <head>
         <script src='socket.io/socket.io.js'></script>
         <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <link href='http://fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700' rel='stylesheet' type='text/css'>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <link href="/css/main.css" rel="stylesheet">
 		<script>
 			console.log('Connecting to websocket at url ' + location.host + '/browser' + location.pathname);
             var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 			
-			var phoneFrameImageWidth = 1690;
-			var phoneFrameImageHeight = 2857;
-			var phoneFrameScreenWidth = 1080;
-			var phoneFrameScreenHeight = 1920;
-			var phoneFrameScreenOffsetX = 304;
-			var phoneFrameScreenOffsetY = 436;
+			// var phoneFrameImageWidth = 1690;
+			// var phoneFrameImageHeight = 2857;
+			// var phoneFrameScreenWidth = 1080;
+			// var phoneFrameScreenHeight = 1920;
+			// var phoneFrameScreenOffsetX = 304;
+			// var phoneFrameScreenOffsetY = 436;
+
+            var phoneFrameImageWidth = 815;
+            var phoneFrameImageHeight = 1107;
+            var phoneFrameScreenWidth = 485;
+            var phoneFrameScreenHeight = 862;
+            var phoneFrameScreenOffsetX = 163;
+            var phoneFrameScreenOffsetY = 93;
 			
 			var phoneFrameScreenPercentageWidth = phoneFrameScreenWidth/phoneFrameImageWidth;
 			var phoneFrameScreenPercentageHeight = phoneFrameScreenHeight/phoneFrameImageHeight;
@@ -47,10 +56,12 @@
 
             var lastEvent = null;
 			
-			this.init = function(image, screenWidth, screenHeight) {			
+			this.init = function(image, screenWidth, screenHeight) {		
 				var canvas = document.getElementById("canvas");
 				
-				var phoneFrameRealHeight = window.innerHeight*0.9;
+				var phoneFrameRealHeight = (window.innerHeight - 100) * 0.9;
+                console.log(window.innerHeight);
+                console.log(phoneFrameRealHeight);
 				var phoneFrameRealWidth = phoneFrameRealHeight * phoneFrameScreenPercentageHeight * (screenWidth/screenHeight) / phoneFrameScreenPercentageWidth;
 				
 				canvas.height = phoneFrameRealHeight;
@@ -193,7 +204,7 @@
         </script>
     </head>
 
-    <body class="grad" id="body" onLoad="init(null, 1080, 1920)" style="height: 100%;">
+    <body class="grad auto-container" id="body" onLoad="init(null, 1080, 1920)">
 		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="background-color: #272822; border-color: #272822;">
 			<div class="container">
 				<div class="navbar-header">
@@ -205,29 +216,49 @@
 				</div>
 			</div>
 		</nav>
-		<div class="container">
+		<div class="container" style="margin-top: 50px;">
 			<div class="col-md-12" style="margin-top: 20px;">
-				<div class="col-md-4 col-sm-4 col-xs-12" style="margin-top: 60px;">
+				<div class="col-md-3" style="margin-top: 60px; margin-bottom: 60px;">
 					<ul>1. punkt pierwszy</ul>
 					<ul>2. punkt drugi</ul>
 					<ul>3. punkt trzeci</ul>
 				</div>
-				<div class="col-md-4 col-sm-4 col-xs-12">
-					<img id="phone" src="phoneFrame.png" hidden/>
+				<div class="col-md-6" style="text-align: center;">
+					<img id="phone" src="Nexus_5_Mockup.png" hidden/>
 					<img id="view" src="/image" hidden/>
-					<canvas id="canvas" width="700" height="700"></canvas>
+					<canvas id="canvas"></canvas>
 				</div>
-				<div class="col-md-4 col-sm-4 col-xs-12">
+				<div class="col-md-3">
 				</div>
 			</div>
 			<div class="col-md-12">
-				<div class="col-md-offset-3 col-md-6">
-					<input class="form-control col-md-12">
+                <div class="col-md-1"></div>
+                <div class="col-md-2" style="margin: 5px;">
+                    <button id="delete" style="background-color: #272822; border-color: #757573" class="btn btn-success btn-block">DEL</button>
+                </div>
+				<div class="col-md-6" style="margin: 5px;">
+					<input id="text-input" class="form-control col-md-12">
 				</div>
-				<div class="col-md-1">
-					<button style="background-color: #272822; border-color: #757573" class="btn btn-success">SEND</button>
+				<div class="col-md-2" style="margin: 5px;">
+					<button id="send" style="background-color: #272822; border-color: #757573" class="btn btn-success btn-block">SEND</button>
 				</div>
+                <div class="col-md-1"></div>
 			</div>
 		</div>
+
+        <script>
+            $(function(){
+                $('#send').click(function(){
+                    socket.emit('key', {
+                        text: $('#text-input').val()
+                    });
+                });
+                $('#delete').click(function(){
+                    socket.emit('specialKey', {
+                        name: 'DELETE'
+                    });
+                });
+            });
+        </script>
     </body>
 </html>
