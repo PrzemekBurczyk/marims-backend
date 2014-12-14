@@ -6,7 +6,6 @@
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <link href="/css/main.css" rel="stylesheet">
 		<script>
-			//console.log('Connecting to websocket at url ' + location.host + '/browser' + location.pathname);
             var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 			
 			// var phoneFrameImageWidth = 1690;
@@ -30,14 +29,9 @@
 			
             var refresh = function(image, screenWidth, screenHeight) {
                 if(image !== null && image !== undefined) {
-                    var screen = document.getElementById('view');
                     this.init(image, screenWidth, screenHeight);
-
-                    screen.src = 'data:image/jpg;base64,' + image;
                 }
             };
-
-            //console.log('Connecting to websocket at url ' + 'http://' + location.host + '/browser' + location.pathname);
 
             var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 
@@ -47,10 +41,6 @@
                 }
             });
 
-            //socket.on('debug', function(data){
-            //    console.log(data);
-            //});
-			
 			var gestureModeActive = false;
 
             var lastEvent = null;
@@ -80,19 +70,19 @@
 				var phoneScreenRealWidth = phoneFrameRealWidth * phoneFrameScreenPercentageWidth;
 				var phoneScreenOffsetRealHeight = phoneFrameScreenPercentageOffsetY * phoneFrameRealHeight;
 				var phoneScreenOffsetRealWidth = phoneFrameScreenPercentageOffsetX * phoneFrameRealWidth;
-				var img2 = document.getElementById("view");
 				if (image !== null && image !== undefined) {
-					img2 = document.createElement("img");
+					var img2 = document.createElement("img");
 					img2.src = 'data:image/jpg;base64,' + image;
-				}
-				ctx.drawImage(img2, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
+                    ctx.drawImage(img2, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
+				} else {
+                    // draw placeholder
+                }
 				
-				var screen = document.getElementById('canvas');
 				var screenLeftBorder = phoneScreenOffsetRealWidth;
 				var screenRightBorder = phoneScreenOffsetRealWidth + phoneScreenRealWidth;
 				var screenTopBorder = phoneScreenOffsetRealHeight;
 				var screenBottomBorder = phoneScreenOffsetRealHeight + phoneScreenRealHeight;
-				screen.onmousedown = function(event){
+				canvas.onmousedown = function(event){
 					if(event.pageX !== 0 && event.pageY !== 0) {
 						var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
 						var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
@@ -124,7 +114,7 @@
 						}
 					}
 				};
-				screen.onmousemove = function(event){
+				canvas.onmousemove = function(event){
 					if(gestureModeActive === true && event.pageX !== 0 && event.pageY !== 0) {
 						var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
 						var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
@@ -185,7 +175,7 @@
                         }
                     }
 				};
-				screen.onmouseup = function(event){
+				canvas.onmouseup = function(event){
 					if (gestureModeActive){
 						var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
 						var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
@@ -235,7 +225,6 @@
 		<div style="margin-top: 0;">
 			<div>
 				<img id="phone" src="Nexus_5_Mockup.png" hidden/>
-				<img id="view" src="/image" hidden/>
 				<canvas id="canvas" style="cursor:default"></canvas>
 			</div>
 			<div class="col-md-12">
