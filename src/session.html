@@ -94,8 +94,8 @@
 				var screenBottomBorder = phoneScreenOffsetRealHeight + phoneScreenRealHeight;
 				screen.onmousedown = function(event){
 					if(event.pageX !== 0 && event.pageY !== 0) {
-						var screenX = event.offsetX - screenLeftBorder;
-						var screenY = event.offsetY - screenTopBorder;
+						var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
+						var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
 						if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
 							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
 							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
@@ -118,6 +118,7 @@
                                 });
     							gestureModeActive = true;
     							isMouseOverScreen = true;
+								canvas.setAttribute("style", "cursor:pointer");
     							//console.log('down', x, y);
                             }
 						}
@@ -125,8 +126,8 @@
 				};
 				screen.onmousemove = function(event){
 					if(gestureModeActive === true && event.pageX !== 0 && event.pageY !== 0) {
-						var screenX = event.offsetX - screenLeftBorder;
-						var screenY = event.offsetY - screenTopBorder;
+						var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
+						var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
 						if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
 							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
 							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
@@ -170,6 +171,7 @@
                                     time: Date.now()
                                 });
     							gestureModeActive = false;
+								canvas.setAttribute("style", "cursor:default");
     							//console.log('out', x, y);
                             }
 						}
@@ -177,8 +179,8 @@
 				};
 				screen.onmouseup = function(event){
 					if (gestureModeActive){
-						var screenX = event.offsetX - screenLeftBorder;
-						var screenY = event.offsetY - screenTopBorder;
+						var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
+						var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
 						if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
 							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
 							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
@@ -199,6 +201,7 @@
                                     yPos: y,
                                     time: Date.now()
                                 });
+								canvas.setAttribute("style", "cursor:default");
     							//console.log('up', x, y);
                             }
 						}
@@ -225,7 +228,7 @@
 			<div>
 				<img id="phone" src="Nexus_5_Mockup.png" hidden/>
 				<img id="view" src="/image" hidden/>
-				<canvas id="canvas"></canvas>
+				<canvas id="canvas" style="cursor:default"></canvas>
 			</div>
 			<div class="col-md-12">
                 <div class="col-md-1"></div>
