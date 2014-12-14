@@ -60,16 +60,24 @@
 				var canvas = document.getElementById("canvas");
 				
 				var phoneFrameRealHeight = (window.innerHeight - 100) * 0.9;
+				
+				if (screenWidth > screenHeight) {
+					phoneFrameRealHeight = phoneFrameRealHeight * screenHeight/screenWidth;
+				}
+
                 console.log(window.innerHeight);
                 console.log(phoneFrameRealHeight);
 				var phoneFrameRealWidth = phoneFrameRealHeight * phoneFrameScreenPercentageHeight * (screenWidth/screenHeight) / phoneFrameScreenPercentageWidth;
 				
-				canvas.height = phoneFrameRealHeight;
-				canvas.width = phoneFrameRealWidth;
+				var onCanvasXOffset = (window.innerWidth - phoneFrameRealWidth)/2;
+				var onCanvasYOffset = (window.innerHeight - phoneFrameRealHeight)/2;
+				
+				canvas.height = window.innerHeight - 50;//phoneFrameRealHeight;
+				canvas.width = window.innerWidth - 100;//phoneFrameRealWidth;
 				var ctx = canvas.getContext("2d");
 				var img = document.getElementById("phone");
 				
-				ctx.drawImage(img, 0, 0, phoneFrameRealWidth, phoneFrameRealHeight);
+				ctx.drawImage(img, onCanvasXOffset, onCanvasYOffset, phoneFrameRealWidth, phoneFrameRealHeight);
 				
 				var phoneScreenRealHeight = phoneFrameRealHeight * phoneFrameScreenPercentageHeight;
 				var phoneScreenRealWidth = phoneFrameRealWidth * phoneFrameScreenPercentageWidth;
@@ -80,7 +88,7 @@
 					img2 = document.createElement("img");
 					img2.src = 'data:image/jpg;base64,' + image;
 				}
-				ctx.drawImage(img2, phoneScreenOffsetRealWidth, phoneScreenOffsetRealHeight, phoneScreenRealWidth, phoneScreenRealHeight);
+				ctx.drawImage(img2, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
 				
 				var screen = document.getElementById('canvas');
 				var screenLeftBorder = phoneScreenOffsetRealWidth;
@@ -216,20 +224,11 @@
 				</div>
 			</div>
 		</nav>
-		<div class="container" style="margin-top: 50px;">
-			<div class="col-md-12" style="margin-top: 20px;">
-				<div class="col-md-3" style="margin-top: 60px; margin-bottom: 60px;">
-					<ul>1. punkt pierwszy</ul>
-					<ul>2. punkt drugi</ul>
-					<ul>3. punkt trzeci</ul>
-				</div>
-				<div class="col-md-6" style="text-align: center;">
-					<img id="phone" src="Nexus_5_Mockup.png" hidden/>
-					<img id="view" src="/image" hidden/>
-					<canvas id="canvas"></canvas>
-				</div>
-				<div class="col-md-3">
-				</div>
+		<div style="margin-top: 0;">
+			<div>
+				<img id="phone" src="Nexus_5_Mockup.png" hidden/>
+				<img id="view" src="/image" hidden/>
+				<canvas id="canvas"></canvas>
 			</div>
 			<div class="col-md-12">
                 <div class="col-md-1"></div>
