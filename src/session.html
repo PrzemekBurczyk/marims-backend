@@ -16,9 +16,9 @@
 			// var phoneFrameScreenOffsetX = 304;
 			// var phoneFrameScreenOffsetY = 436;
 
-            var phoneFrameImageWidth = 815;
+            var phoneFrameImageWidth = 816;
             var phoneFrameImageHeight = 1107;
-            var phoneFrameScreenWidth = 485;
+            var phoneFrameScreenWidth = 487;
             var phoneFrameScreenHeight = 862;
             var phoneFrameScreenOffsetX = 163;
             var phoneFrameScreenOffsetY = 93;
@@ -119,7 +119,7 @@
     							gestureModeActive = true;
     							isMouseOverScreen = true;
 								canvas.setAttribute("style", "cursor:pointer");
-    							//console.log('down', x, y);
+    							// console.log('down', x, y);
                             }
 						}
 					}
@@ -148,7 +148,7 @@
                                     yPos: y,
                                     time: Date.now()
                                 });
-    							//console.log('move', x, y);
+    							// console.log('move', x, y);
                             }
 						} else if (screenX < 0 || screenX > phoneScreenRealWidth || screenY < 0 || screenY > phoneScreenRealHeight){
 							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
@@ -175,7 +175,15 @@
     							//console.log('out', x, y);
                             }
 						}
-					}
+					} else {
+                        var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
+                        var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
+                        if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
+                            canvas.setAttribute("style", "cursor:crosshair");
+                        } else {
+                            canvas.setAttribute("style", "cursor:default");
+                        }
+                    }
 				};
 				screen.onmouseup = function(event){
 					if (gestureModeActive){
