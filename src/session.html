@@ -6,7 +6,7 @@
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
         <link href="/css/main.css" rel="stylesheet">
 		<script>
-			console.log('Connecting to websocket at url ' + location.host + '/browser' + location.pathname);
+			//console.log('Connecting to websocket at url ' + location.host + '/browser' + location.pathname);
             var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 			
 			// var phoneFrameImageWidth = 1690;
@@ -30,27 +30,26 @@
 			
             var refresh = function(image, screenWidth, screenHeight) {
                 if(image !== null && image !== undefined) {
-                    var screen = document.getElementById('screen');
+                    var screen = document.getElementById('view');
                     this.init(image, screenWidth, screenHeight);
 
                     screen.src = 'data:image/jpg;base64,' + image;
                 }
             };
 
-            console.log('Connecting to websocket at url ' + 'http://' + location.host + '/browser' + location.pathname);
+            //console.log('Connecting to websocket at url ' + 'http://' + location.host + '/browser' + location.pathname);
 
             var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 
             socket.on('refresh', function(data){
-                console.log('Refreshing');
                 if(data !== null && data !== undefined){
                     refresh(data.image, data.screenWidth, data.screenHeight);
                 }
             });
 
-            socket.on('debug', function(data){
-                console.log(data);
-            });
+            //socket.on('debug', function(data){
+            //    console.log(data);
+            //});
 			
 			var gestureModeActive = false;
 
@@ -65,9 +64,7 @@
 					phoneFrameRealHeight = phoneFrameRealHeight * screenHeight/screenWidth;
 				}
 
-                console.log(window.innerHeight);
-                console.log(phoneFrameRealHeight);
-				var phoneFrameRealWidth = phoneFrameRealHeight * phoneFrameScreenPercentageHeight * (screenWidth/screenHeight) / phoneFrameScreenPercentageWidth;
+                var phoneFrameRealWidth = phoneFrameRealHeight * phoneFrameScreenPercentageHeight * (screenWidth/screenHeight) / phoneFrameScreenPercentageWidth;
 				
 				var onCanvasXOffset = (window.innerWidth - phoneFrameRealWidth)/2;
 				var onCanvasYOffset = (window.innerHeight - phoneFrameRealHeight)/2;
@@ -121,7 +118,7 @@
                                 });
     							gestureModeActive = true;
     							isMouseOverScreen = true;
-    							console.log('down', x, y);
+    							//console.log('down', x, y);
                             }
 						}
 					}
@@ -150,7 +147,7 @@
                                     yPos: y,
                                     time: Date.now()
                                 });
-    							console.log('move', x, y);
+    							//console.log('move', x, y);
                             }
 						} else if (screenX < 0 || screenX > phoneScreenRealWidth || screenY < 0 || screenY > phoneScreenRealHeight){
 							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
@@ -173,7 +170,7 @@
                                     time: Date.now()
                                 });
     							gestureModeActive = false;
-    							console.log('out', x, y);
+    							//console.log('out', x, y);
                             }
 						}
 					}
@@ -202,7 +199,7 @@
                                     yPos: y,
                                     time: Date.now()
                                 });
-    							console.log('up', x, y);
+    							//console.log('up', x, y);
                             }
 						}
 						gestureModeActive = false;

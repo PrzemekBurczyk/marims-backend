@@ -6,18 +6,18 @@
         <link href="/css/main.css" rel="stylesheet">
         <script>
             var qrLink;
-            console.log('Connecting to websocket at url ' + location.href + 'browser');
+            //console.log('Connecting to websocket at url ' + location.href + 'browser');
             var socket = io.connect(location.href + 'browser');
 
-            socket.on('debug', function(data){
-                console.log(data);
-            });
+            //socket.on('debug', function(data){
+            //    console.log(data);
+            //});
 
             socket.on('sessionGenerated', function(sessionData){
-                console.log(sessionData.sessionId);
-                console.log(sessionData.androidAppUrl);
-                console.log(sessionData.browserUrl);
-                console.log(sessionData.browserWebsocketUrl);
+                //console.log(sessionData.sessionId);
+                //console.log(sessionData.androidAppUrl);
+                //console.log(sessionData.browserUrl);
+                //console.log(sessionData.browserWebsocketUrl);
                 qrLink = location.href + sessionData.browserUrl;
                 document.getElementById('qrcode-link').setAttribute('href', qrLink);
 				document.getElementById("qrLinkInput").setAttribute("value", qrLink);
@@ -54,7 +54,8 @@
 				<input class="col-md-12 form-control" id="qrLinkInput" onclick="this.focus();this.select()">
 			</div>
 			<div class="col-md-12" style="margin-top: 50px; margin-bottom: 50px;">
-				<div class="col-md-4 col-sm-4 col-xs-12">
+				<div class="col-md-4 col-sm-4 col-xs-12" style="text-align: center;">
+					<h1>Tytul 1</h1>
 					<ul>1. punkt pierwszy</ul>
 					<ul>2. punkt drugi</ul>
 					<ul>3. punkt trzeci</ul>
@@ -66,7 +67,12 @@
 						</a>
 					</div>
 				</div>
-				<div class="col-md-4 col-sm-4 col-xs-12"></div>
+				<div class="col-md-4 col-sm-4 col-xs-12" style="text-align: center;">
+					<h1>Tytul 2</h1>
+					<ul>1. punkt pierwszy</ul>
+					<ul>2. punkt drugi</ul>
+					<ul>3. punkt trzeci</ul>
+				</div>
 			</div>
 		</div>
     </body>
