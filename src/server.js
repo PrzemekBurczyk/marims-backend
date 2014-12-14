@@ -28,8 +28,8 @@ browsers.on('connection', function(socket){
   }
 
   //generate new session id here
-  // var sessionId = uuid.v4();
-  var sessionId = '123e4567-e89b-12d3-a456-426655440000';
+  var sessionId = uuid.v4();
+  // var sessionId = '123e4567-e89b-12d3-a456-426655440000';
 
   var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
   var androidAppUrl = 'marims://' + androidWebsocketUrl;
