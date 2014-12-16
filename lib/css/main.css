@@ -8,3 +8,9 @@
 .auto-container {
 	height: calc(100% - 50px);
 }
+
+@media screen and (min-width: 1200px) {
+	.starter-template {
+		margin-left: 32px;
+	}
+}
