@@ -14,3 +14,13 @@
 		margin-left: 32px;
 	}
 }
+
+.auto-align {
+	text-align: center;
+}
+
+@media screen and (max-width: 1000px) {
+	.auto-align {
+		text-align: left;
+	}
+}
