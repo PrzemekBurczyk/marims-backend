@@ -27,6 +27,8 @@
 			var phoneFrameScreenPercentageOffsetX = phoneFrameScreenOffsetX/phoneFrameImageWidth;
 			var phoneFrameScreenPercentageOffsetY = phoneFrameScreenOffsetY/phoneFrameImageHeight;
 			
+            var lastRefreshTime = Date.now();
+
             var refresh = function(image, screenWidth, screenHeight) {
                 if(image !== null && image !== undefined) {
                     this.init(image, screenWidth, screenHeight);

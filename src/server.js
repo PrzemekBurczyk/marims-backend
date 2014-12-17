@@ -1,7 +1,11 @@
 var DEBUG = false;
+var port = Number(5000);
 
 require('colors');
+
 var dgram = require('dgram');
+var net = require('net');
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var path = require('path');
@@ -135,7 +139,6 @@ io.on('connection', function(socket){
   
 });
 
-var port = Number(5000);
 http.listen(port, function() {
   console.log(('Listening on ' + port).green);
 });
@@ -252,3 +255,38 @@ udpSocket.on('message', function(msg, rinfo){
 });
 
 udpSocket.bind(6666);
+
+var tcpBuffer = {};
+
+net.createServer(function(socket){
+  var address = socket.remoteAddress + ':' + socket.remotePort;
+  console.log('tcp connected: ' + address);
+
+  tcpBuffer[address] = '';
+
+  socket.on('data', function(msg) {
+    tcpBuffer[address] += msg;
+    if(msg[msg.length - 1] === 10) { // 10 is Line Feed
+      try {
+        var data = JSON.parse(tcpBuffer[address]);
+        var sessionId = data.sessionId;
+        if(sessionBrowsers[sessionId] !== undefined && sessionBrowsers[sessionId] !== null){
+          sessionBrowsers[sessionId].emit('refresh', { 
+            image: data.image,
+            screenWidth: data.screenWidth,
+            screenHeight: data.screenHeight
+          });
+          tcpBuffer[address] = '';
+        }
+      } catch(err) {
+        tcpBuffer[address] = '';
+      }
+    }
+  });
+
+  socket.on('close', function(data){
+    console.log('tcp closed: ' + address);
+    delete tcpBuffer[address];
+  });
+
+}).listen(7777);
