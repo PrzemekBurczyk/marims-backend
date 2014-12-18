@@ -180,7 +180,6 @@ udpSocket.on('message', function(msg, rinfo){
   var payloadCount = msg[1];
   var sessionId = msg.toString('ascii', 3, 39);
   if(sessionBrowsers[sessionId] !== undefined && sessionBrowsers[sessionId] !== null){
-    console.log(screenshotId + ": " + payloadId + "/" + payloadCount);
     // if whole screen was more than 1 payload
     if(payloadCount > 1){
       var payload = msg.slice(39);
