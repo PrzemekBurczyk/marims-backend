@@ -20,6 +20,9 @@ function HttpConnectionHandler(path, imgPath, http, port, app, sessionBrowsers) 
         storage: storage,
         fileFilter: function(req, file, callback) {
             return callback(null, true);
+        },
+        limits: {
+            fieldSize: 1024 * 1024 * 100 // 100MB
         }
     });
 
@@ -45,8 +48,7 @@ function HttpConnectionHandler(path, imgPath, http, port, app, sessionBrowsers) 
     });
 
     app.post('/files', upload.single('file'), function(req, res, next) {
-        console.log('post to files');
-        res.status(200).send('gitara');
+        res.status(204).send();
     });
 
     app.get('/files', function(req, res, next) {
