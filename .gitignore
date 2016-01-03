@@ -4,3 +4,4 @@ database/
 marims-aws.pem
 marims-aws.ppk
 marims-aws.pub
+.idea/
