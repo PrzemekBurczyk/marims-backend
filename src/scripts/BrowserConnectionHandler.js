@@ -1,20 +1,19 @@
 var uuid = require('node-uuid');
+var _ = require('lodash');
 
-function BrowserConnectionHandler(app, io, path, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, DEBUG) {
+function BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, DEBUG) {
     var browsers = io.of(browserEndpoint);
-    browsers.on('connection', function(socket) {
-        if (DEBUG) {
-            console.log('Browser connected');
-        }
+    var self = this;
 
-        //generate new session id here
-        var sessionId = uuid.v4();
-        // var sessionId = '123e4567-e89b-12d3-a456-426655440000';
-
-        var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
-        var androidAppUrl = 'marims://' + androidWebsocketUrl;
-        var browserUrl = sessionId;
+    this.listenOnSessionId = function(sessionId, filename) {
         var browserWebsocketUrl = browserEndpoint + '/' + sessionId;
+
+        var session = {
+            creationTimestamp: Date.now(),
+            id: sessionId,
+            file: filename
+        };
+        sessions.push(session);
 
         // creating browser websocket listener for generated session
         sessionBrowsers[sessionId] = io.of(browserWebsocketUrl);
@@ -96,6 +95,36 @@ function BrowserConnectionHandler(app, io, path, browserEndpoint, androidEndpoin
         app.get('/' + sessionId, function(req, res) {
             res.sendfile(path.resolve('src/html/session.html'));
         });
+
+        io.of(clientEndpoint).emit('sessions', sessions);
+
+        return browserWebsocketUrl;
+    };
+
+    this.stopListeningOnSessionId = function(sessionId) {
+        var removedSessions = _.remove(sessions, function(session) {
+            return session.id === sessionId;
+        });
+        if (removedSessions.length === 0) {
+            return false;
+        } else {
+            io.of(clientEndpoint).emit('sessions', sessions);
+            return true;
+        }
+    };
+
+    browsers.on('connection', function(socket) {
+        if (DEBUG) {
+            console.log('Browser connected');
+        }
+
+        //generate new session id here
+        var sessionId = uuid.v4();
+
+        var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
+        var androidAppUrl = 'marims://' + androidWebsocketUrl;
+        var browserUrl = sessionId;
+        var browserWebsocketUrl = self.listenOnSessionId(sessionId);
 
         //notifying that the session is ready to use
         socket.emit('sessionGenerated', {

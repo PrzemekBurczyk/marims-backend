@@ -1,265 +1,273 @@
 <html>
-    <head>
-        <script src='socket.io/socket.io.js'></script>
-        <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-        <link href='http://fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700' rel='stylesheet' type='text/css'>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-        <link href="/css/main.css" rel="stylesheet">
-		<script>
-            var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
-			
-			// var phoneFrameImageWidth = 1690;
-			// var phoneFrameImageHeight = 2857;
-			// var phoneFrameScreenWidth = 1080;
-			// var phoneFrameScreenHeight = 1920;
-			// var phoneFrameScreenOffsetX = 304;
-			// var phoneFrameScreenOffsetY = 436;
+<head>
+    <script src='socket.io/socket.io.js'></script>
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href='http://fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <link href="/css/main.css" rel="stylesheet">
+    <script>
+        var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 
-            var phoneFrameImageWidth = 816;
-            var phoneFrameImageHeight = 1107;
-            var phoneFrameScreenWidth = 487;
-            var phoneFrameScreenHeight = 862;
-            var phoneFrameScreenOffsetX = 163;
-            var phoneFrameScreenOffsetY = 93;
-			
-			var phoneFrameScreenPercentageWidth = phoneFrameScreenWidth/phoneFrameImageWidth;
-			var phoneFrameScreenPercentageHeight = phoneFrameScreenHeight/phoneFrameImageHeight;
-			var phoneFrameScreenPercentageOffsetX = phoneFrameScreenOffsetX/phoneFrameImageWidth;
-			var phoneFrameScreenPercentageOffsetY = phoneFrameScreenOffsetY/phoneFrameImageHeight;
-			
-            var lastRefreshTime = Date.now();
+        // var phoneFrameImageWidth = 1690;
+        // var phoneFrameImageHeight = 2857;
+        // var phoneFrameScreenWidth = 1080;
+        // var phoneFrameScreenHeight = 1920;
+        // var phoneFrameScreenOffsetX = 304;
+        // var phoneFrameScreenOffsetY = 436;
 
-            var refresh = function(image, screenWidth, screenHeight) {
-                if(image !== null && image !== undefined) {
-                    this.init(image, screenWidth, screenHeight);
+        var phoneFrameImageWidth = 816;
+        var phoneFrameImageHeight = 1107;
+        var phoneFrameScreenWidth = 487;
+        var phoneFrameScreenHeight = 862;
+        var phoneFrameScreenOffsetX = 163;
+        var phoneFrameScreenOffsetY = 93;
+
+        var phoneFrameScreenPercentageWidth = phoneFrameScreenWidth / phoneFrameImageWidth;
+        var phoneFrameScreenPercentageHeight = phoneFrameScreenHeight / phoneFrameImageHeight;
+        var phoneFrameScreenPercentageOffsetX = phoneFrameScreenOffsetX / phoneFrameImageWidth;
+        var phoneFrameScreenPercentageOffsetY = phoneFrameScreenOffsetY / phoneFrameImageHeight;
+
+        var lastRefreshTime = Date.now();
+
+        var refresh = function(image, screenWidth, screenHeight) {
+            if (image !== null && image !== undefined) {
+                this.init(image, screenWidth, screenHeight);
+            }
+        };
+
+        socket.on('refresh', function(data) {
+            if (data !== null && data !== undefined) {
+                refresh(data.image, data.screenWidth, data.screenHeight);
+            }
+        });
+
+        var gestureModeActive = false;
+
+        var lastEvent = null;
+
+        this.init = function(image, screenWidth, screenHeight) {
+            var canvas = document.getElementById("canvas");
+
+            var phoneFrameRealHeight = (window.innerHeight - 100) * 0.9;
+
+            if (screenWidth > screenHeight) {
+                phoneFrameRealHeight = phoneFrameRealHeight * screenHeight / screenWidth;
+            }
+
+            var phoneFrameRealWidth = phoneFrameRealHeight * phoneFrameScreenPercentageHeight * (screenWidth / screenHeight) / phoneFrameScreenPercentageWidth;
+
+            var onCanvasXOffset = (window.innerWidth - phoneFrameRealWidth) / 2;
+            var onCanvasYOffset = (window.innerHeight - phoneFrameRealHeight) / 2;
+
+            canvas.height = window.innerHeight - 50;//phoneFrameRealHeight;
+            canvas.width = window.innerWidth - 100;//phoneFrameRealWidth;
+            var ctx = canvas.getContext("2d");
+            var img = document.getElementById("phone");
+
+            ctx.drawImage(img, onCanvasXOffset, onCanvasYOffset, phoneFrameRealWidth, phoneFrameRealHeight);
+
+            var phoneScreenRealHeight = phoneFrameRealHeight * phoneFrameScreenPercentageHeight;
+            var phoneScreenRealWidth = phoneFrameRealWidth * phoneFrameScreenPercentageWidth;
+            var phoneScreenOffsetRealHeight = phoneFrameScreenPercentageOffsetY * phoneFrameRealHeight;
+            var phoneScreenOffsetRealWidth = phoneFrameScreenPercentageOffsetX * phoneFrameRealWidth;
+            var screenImg = null;
+            if (image !== null && image !== undefined) {
+                screenImg = document.createElement("img");
+                screenImg.src = 'data:image/jpg;base64,' + image;
+                ctx.drawImage(screenImg, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
+            } else {
+                screenImg = document.getElementById("placeholder");
+                ctx.drawImage(screenImg, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
+
+            }
+
+            var screenLeftBorder = phoneScreenOffsetRealWidth;
+            var screenRightBorder = phoneScreenOffsetRealWidth + phoneScreenRealWidth;
+            var screenTopBorder = phoneScreenOffsetRealHeight;
+            var screenBottomBorder = phoneScreenOffsetRealHeight + phoneScreenRealHeight;
+
+            canvas.onmousedown = function(event) {
+                if (event.pageX !== 0 && event.pageY !== 0) {
+                    var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
+                    var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
+                    if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
+                        var x = Math.floor(screenX / phoneScreenRealWidth * screenWidth);
+                        var y = Math.floor(screenY / phoneScreenRealHeight * screenHeight);
+                        var newEvent = {
+                            x: x,
+                            y: y,
+                            type: 'DOWN'
+                        };
+                        if (lastEvent === undefined ||
+                                lastEvent === null ||
+                                lastEvent.x !== newEvent.x ||
+                                lastEvent.y !== newEvent.y ||
+                                lastEvent.type !== newEvent.type) {
+
+                            lastEvent = newEvent;
+                            socket.emit('mouseDown', {
+                                xPos: x,
+                                yPos: y,
+                                time: Date.now()
+                            });
+                            gestureModeActive = true;
+                            isMouseOverScreen = true;
+                            canvas.setAttribute("style", "cursor:pointer");
+                            // console.log('down', x, y);
+                        }
+                    }
                 }
             };
 
-            var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
-
-            socket.on('refresh', function(data){
-                if(data !== null && data !== undefined){
-                    refresh(data.image, data.screenWidth, data.screenHeight);
-                }
-            });
-
-			var gestureModeActive = false;
-
-            var lastEvent = null;
-			
-			this.init = function(image, screenWidth, screenHeight) {		
-				var canvas = document.getElementById("canvas");
-				
-				var phoneFrameRealHeight = (window.innerHeight - 100) * 0.9;
-				
-				if (screenWidth > screenHeight) {
-					phoneFrameRealHeight = phoneFrameRealHeight * screenHeight/screenWidth;
-				}
-
-                var phoneFrameRealWidth = phoneFrameRealHeight * phoneFrameScreenPercentageHeight * (screenWidth/screenHeight) / phoneFrameScreenPercentageWidth;
-				
-				var onCanvasXOffset = (window.innerWidth - phoneFrameRealWidth)/2;
-				var onCanvasYOffset = (window.innerHeight - phoneFrameRealHeight)/2;
-				
-				canvas.height = window.innerHeight - 50;//phoneFrameRealHeight;
-				canvas.width = window.innerWidth - 100;//phoneFrameRealWidth;
-				var ctx = canvas.getContext("2d");
-				var img = document.getElementById("phone");
-				
-				ctx.drawImage(img, onCanvasXOffset, onCanvasYOffset, phoneFrameRealWidth, phoneFrameRealHeight);
-				
-				var phoneScreenRealHeight = phoneFrameRealHeight * phoneFrameScreenPercentageHeight;
-				var phoneScreenRealWidth = phoneFrameRealWidth * phoneFrameScreenPercentageWidth;
-				var phoneScreenOffsetRealHeight = phoneFrameScreenPercentageOffsetY * phoneFrameRealHeight;
-				var phoneScreenOffsetRealWidth = phoneFrameScreenPercentageOffsetX * phoneFrameRealWidth;
-				if (image !== null && image !== undefined) {
-					var screenImg = document.createElement("img");
-					screenImg.src = 'data:image/jpg;base64,' + image;
-                    ctx.drawImage(screenImg, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
-				} else {
-                    var screenImg = document.getElementById("placeholder");
-                    ctx.drawImage(screenImg, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
-
-                }
-				
-				var screenLeftBorder = phoneScreenOffsetRealWidth;
-				var screenRightBorder = phoneScreenOffsetRealWidth + phoneScreenRealWidth;
-				var screenTopBorder = phoneScreenOffsetRealHeight;
-				var screenBottomBorder = phoneScreenOffsetRealHeight + phoneScreenRealHeight;
-				canvas.onmousedown = function(event){
-					if(event.pageX !== 0 && event.pageY !== 0) {
-						var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
-						var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
-						if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
-							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
-							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
-                            var newEvent = {
-                                x: x,
-                                y: y,
-                                type: 'DOWN'
-                            }
-                            if(lastEvent === undefined ||
+            canvas.onmousemove = function(event) {
+                var screenX, screenY;
+                if (gestureModeActive === true && event.pageX !== 0 && event.pageY !== 0) {
+                    screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
+                    screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
+                    var x, y, newEvent;
+                    if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
+                        x = Math.floor(screenX / phoneScreenRealWidth * screenWidth);
+                        y = Math.floor(screenY / phoneScreenRealHeight * screenHeight);
+                        newEvent = {
+                            x: x,
+                            y: y,
+                            type: 'MOVE'
+                        };
+                        if (lastEvent === undefined ||
                                 lastEvent === null ||
                                 lastEvent.x !== newEvent.x ||
                                 lastEvent.y !== newEvent.y ||
-                                lastEvent.type !== newEvent.type){
+                                lastEvent.type !== newEvent.type) {
 
-                                lastEvent = newEvent;
-    							socket.emit('mouseDown', {
-                                    xPos: x, 
-                                    yPos: y,
-                                    time: Date.now()
-                                });
-    							gestureModeActive = true;
-    							isMouseOverScreen = true;
-								canvas.setAttribute("style", "cursor:pointer");
-    							// console.log('down', x, y);
-                            }
-						}
-					}
-				};
-				canvas.onmousemove = function(event){
-					if(gestureModeActive === true && event.pageX !== 0 && event.pageY !== 0) {
-						var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
-						var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
-						if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
-							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
-							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
-                            var newEvent = {
-                                x: x,
-                                y: y,
-                                type: 'MOVE'
-                            }
-                            if(lastEvent === undefined ||
+                            lastEvent = newEvent;
+                            socket.emit('mouseMove', {
+                                xPos: x,
+                                yPos: y,
+                                time: Date.now()
+                            });
+                            // console.log('move', x, y);
+                        }
+                    } else if (screenX < 0 || screenX > phoneScreenRealWidth || screenY < 0 || screenY > phoneScreenRealHeight) {
+                        x = Math.floor(screenX / phoneScreenRealWidth * screenWidth);
+                        y = Math.floor(screenY / phoneScreenRealHeight * screenHeight);
+                        newEvent = {
+                            x: x,
+                            y: y,
+                            type: 'UP'
+                        };
+                        if (lastEvent === undefined ||
                                 lastEvent === null ||
                                 lastEvent.x !== newEvent.x ||
                                 lastEvent.y !== newEvent.y ||
-                                lastEvent.type !== newEvent.type){
+                                lastEvent.type !== newEvent.type) {
 
-                                lastEvent = newEvent;
-    							socket.emit('mouseMove', {
-                                    xPos: x, 
-                                    yPos: y,
-                                    time: Date.now()
-                                });
-    							// console.log('move', x, y);
-                            }
-						} else if (screenX < 0 || screenX > phoneScreenRealWidth || screenY < 0 || screenY > phoneScreenRealHeight){
-							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
-							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
-                            var newEvent = {
-                                x: x,
-                                y: y,
-                                type: 'UP'
-                            }
-                            if(lastEvent === undefined ||
-                                lastEvent === null ||
-                                lastEvent.x !== newEvent.x ||
-                                lastEvent.y !== newEvent.y ||
-                                lastEvent.type !== newEvent.type){
-
-                                lastEvent = newEvent;
-    							socket.emit('mouseUp', {
-                                    xPos: x, 
-                                    yPos: y,
-                                    time: Date.now()
-                                });
-    							gestureModeActive = false;
-								canvas.setAttribute("style", "cursor:default");
-    							//console.log('out', x, y);
-                            }
-						}
-					} else {
-                        var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
-                        var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
-                        if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
-                            canvas.setAttribute("style", "cursor:crosshair");
-                        } else {
+                            lastEvent = newEvent;
+                            socket.emit('mouseUp', {
+                                xPos: x,
+                                yPos: y,
+                                time: Date.now()
+                            });
+                            gestureModeActive = false;
                             canvas.setAttribute("style", "cursor:default");
+                            //console.log('out', x, y);
                         }
                     }
-				};
-				canvas.onmouseup = function(event){
-					if (gestureModeActive){
-						var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
-						var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
-						if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
-							var x = Math.floor(screenX/phoneScreenRealWidth*screenWidth);
-							var y = Math.floor(screenY/phoneScreenRealHeight*screenHeight);
-                            var newEvent = {
-                                x: x,
-                                y: y,
-                                type: 'UP'
-                            }
-                            if(lastEvent !== undefined ||
+                } else {
+                    screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
+                    screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
+                    if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
+                        canvas.setAttribute("style", "cursor:crosshair");
+                    } else {
+                        canvas.setAttribute("style", "cursor:default");
+                    }
+                }
+            };
+            canvas.onmouseup = function(event) {
+                if (gestureModeActive) {
+                    var screenX = event.offsetX - screenLeftBorder - onCanvasXOffset;
+                    var screenY = event.offsetY - screenTopBorder - onCanvasYOffset;
+                    if (screenX >= 0 && screenX <= phoneScreenRealWidth && screenY >= 0 && screenY <= phoneScreenRealHeight) {
+                        var x = Math.floor(screenX / phoneScreenRealWidth * screenWidth);
+                        var y = Math.floor(screenY / phoneScreenRealHeight * screenHeight);
+                        var newEvent = {
+                            x: x,
+                            y: y,
+                            type: 'UP'
+                        };
+                        if (lastEvent !== undefined ||
                                 lastEvent !== null ||
                                 lastEvent.x !== newEvent.x ||
                                 lastEvent.y !== newEvent.y ||
-                                lastEvent.type !== newEvent.type){
+                                lastEvent.type !== newEvent.type) {
 
-                                lastEvent = newEvent;
-    							socket.emit('mouseUp', {
-                                    xPos: x, 
-                                    yPos: y,
-                                    time: Date.now()
-                                });
-								canvas.setAttribute("style", "cursor:default");
-    							//console.log('up', x, y);
-                            }
-						}
-						gestureModeActive = false;
-					}
-				};
-			}
-        </script>
-    </head>
+                            lastEvent = newEvent;
+                            socket.emit('mouseUp', {
+                                xPos: x,
+                                yPos: y,
+                                time: Date.now()
+                            });
+                            canvas.setAttribute("style", "cursor:default");
+                            //console.log('up', x, y);
+                        }
+                    }
+                    gestureModeActive = false;
+                }
+            };
+        }
+    </script>
+</head>
 
-    <body class="grad auto-container" id="body" onLoad="init(null, 1080, 1920)">
-		<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation" style="background-color: #272822; border-color: #272822;">
-			<div class="container">
-				<div class="navbar-header">
-					<a class="navbar-brand" href="/" style="color: #C0C0C0;"><b>MARIMS</b></a>
-				</div>
-				<div id="navbar" class="collapse navbar-collapse">
-					<ul class="nav navbar-nav">
-					</ul>
-				</div>
-			</div>
-		</nav>
-		<div style="margin-top: 0;">
-			<div>
-				<img id="phone" src="Nexus_5_Mockup.png" hidden/>
-                <img id="placeholder" src="device_disconnected.png" hidden/>
-				<canvas id="canvas" style="cursor:default"></canvas>
-			</div>
-			<div class="col-md-12">
-                <div class="col-md-1"></div>
-                <div class="col-md-2" style="margin: 5px;">
-                    <button id="delete" style="background-color: #272822; border-color: #757573" class="btn btn-success btn-block">DEL</button>
-                </div>
-				<div class="col-md-6" style="margin: 5px;">
-					<input id="text-input" class="form-control col-md-12">
-				</div>
-				<div class="col-md-2" style="margin: 5px;">
-					<button id="send" style="background-color: #272822; border-color: #757573" class="btn btn-success btn-block">SEND</button>
-				</div>
-                <div class="col-md-1"></div>
-			</div>
-		</div>
+<body class="grad auto-container" id="body" onLoad="init(null, 1080, 1920)">
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation"
+     style="background-color: #272822; border-color: #272822;">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/" style="color: #C0C0C0;"><b>MARIMS</b></a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+            </ul>
+        </div>
+    </div>
+</nav>
+<div style="margin-top: 0;">
+    <div>
+        <img id="phone" src="Nexus_5_Mockup.png" hidden/>
+        <img id="placeholder" src="device_disconnected.png" hidden/>
+        <canvas id="canvas" style="cursor:default"></canvas>
+    </div>
+    <div class="col-md-12">
+        <div class="col-md-1"></div>
+        <div class="col-md-2" style="margin: 5px;">
+            <button id="delete" style="background-color: #272822; border-color: #757573"
+                    class="btn btn-success btn-block">DEL
+            </button>
+        </div>
+        <div class="col-md-6" style="margin: 5px;">
+            <input id="text-input" class="form-control col-md-12">
+        </div>
+        <div class="col-md-2" style="margin: 5px;">
+            <button id="send" style="background-color: #272822; border-color: #757573"
+                    class="btn btn-success btn-block">SEND
+            </button>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>
 
-        <script>
-            $(function(){
-                $('#send').click(function(){
-                    socket.emit('key', {
-                        text: $('#text-input').val()
-                    });
-                });
-                $('#delete').click(function(){
-                    socket.emit('specialKey', {
-                        name: 'DELETE'
-                    });
-                });
+<script>
+    $(function() {
+        $('#send').click(function() {
+            socket.emit('key', {
+                text: $('#text-input').val()
             });
-        </script>
-    </body>
+        });
+        $('#delete').click(function() {
+            socket.emit('specialKey', {
+                name: 'DELETE'
+            });
+        });
+    });
+</script>
+</body>
 </html>
