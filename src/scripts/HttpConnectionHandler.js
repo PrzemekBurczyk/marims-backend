@@ -1,4 +1,4 @@
-function HttpConnectionHandler(path, imgPath, http, port, app, sessionBrowsers) {
+function HttpConnectionHandler(io, path, imgPath, http, port, app, sessionBrowsers, clientEndpoint) {
     var fs = require('fs');
     var path = require('path');
     var multer = require('multer');
@@ -8,8 +8,9 @@ function HttpConnectionHandler(path, imgPath, http, port, app, sessionBrowsers) 
         filename: function(req, file, callback) {
             var applicationName = req.body.applicationName;
             var applicationVersion = req.body.applicationVersion;
-            if (applicationName && applicationVersion) {
-                return callback(null, applicationName + '-' + applicationVersion + '.apk');
+            var applicationVersionCode = req.body.applicationVersionCode;
+            if (applicationName && applicationVersion && applicationVersionCode) {
+                return callback(null, applicationName + '-' + applicationVersion + '-(' + applicationVersionCode + ').apk');
             } else {
                 return callback(null, file.originalname);
             }
@@ -19,7 +20,14 @@ function HttpConnectionHandler(path, imgPath, http, port, app, sessionBrowsers) 
     var upload = multer({
         storage: storage,
         fileFilter: function(req, file, callback) {
-            return callback(null, true);
+            var applicationName = req.body.applicationName;
+            var applicationVersion = req.body.applicationVersion;
+            var applicationVersionCode = req.body.applicationVersionCode;
+            if (applicationName && applicationVersion && applicationVersionCode) {
+                return callback(null, true);
+            } else {
+                return callback(null, false);
+            }
         },
         limits: {
             fieldSize: 1024 * 1024 * 100 // 100MB
@@ -27,7 +35,7 @@ function HttpConnectionHandler(path, imgPath, http, port, app, sessionBrowsers) 
     });
 
     http.listen(port, function() {
-        console.log(('Listening on ' + port).green);
+        console.log(('HTTP listening on ' + port).green);
     });
 
     app.get('/', function(req, res) {
@@ -48,7 +56,15 @@ function HttpConnectionHandler(path, imgPath, http, port, app, sessionBrowsers) 
     });
 
     app.post('/files', upload.single('file'), function(req, res, next) {
-        res.status(204).send();
+        if (req.file) {
+            res.status(204).send();
+            fs.readdir('files/', function(err, files) {
+                if (err) return console.log(err);
+                io.of(clientEndpoint).emit('files', files);
+            });
+        } else {
+            res.status(400).send("File upload failed");
+        }
     });
 
     app.get('/files', function(req, res, next) {
@@ -68,6 +84,10 @@ function HttpConnectionHandler(path, imgPath, http, port, app, sessionBrowsers) 
         fs.unlink(path.normalize(__dirname + '/../../files/' + filename), function(err) {
             if (err) return next(err);
             res.status(204).send();
+            fs.readdir('files/', function(err, files) {
+                if (err) return console.log(err);
+                io.of(clientEndpoint).emit('files', files);
+            });
         });
     });
 }
