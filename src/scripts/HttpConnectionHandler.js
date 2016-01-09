@@ -82,7 +82,7 @@ function HttpConnectionHandler(io, path, imgPath, http, port, app, sessionBrowse
     app.delete('/files/:filename', function(req, res, next) {
         var filename = req.params.filename;
         fs.unlink(path.normalize(__dirname + '/../../files/' + filename), function(err) {
-            if (err) return next(err);
+            if (err) return res.status(400).send();
             res.status(204).send();
             fs.readdir('files/', function(err, files) {
                 if (err) return console.log(err);

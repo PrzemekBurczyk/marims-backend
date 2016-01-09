@@ -16,13 +16,18 @@ function ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrows
             socket.emit('files', files);
         });
 
-        socket.on('createSession', function(session) {
+        socket.emit('sessions', sessions);
+
+        socket.on('createSession', function(filename) {
             if (DEBUG) {
-                console.log('Creating session for: ' + session.file);
+                console.log('Creating session for: ' + filename);
             }
-            fs.readFile(path.normalize(__dirname + '/../../files/' + file), function(err, file) {
+            fs.readFile(path.normalize(__dirname + '/../../files/' + filename), function(err, file) {
                 if (err) return socket.emit('sessionCreationFailed');
-                session.id = uuid.v4();
+                var session = {
+                    id: uuid.v4(),
+                    file: filename
+                };
                 sessions.push(session);
                 clients.emit('sessions', sessions);
             });
