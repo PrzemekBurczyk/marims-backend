@@ -22,6 +22,12 @@ function BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, brows
                 console.log('Browser connected to session ' + sessionId);
             }
 
+            socket.on('disconnect', function(socket) {
+                if (DEBUG) {
+                    console.log('Browser disconnected from session ' + sessionId);
+                }
+            });
+
             socket.on('key', function(data) {
                 if (DEBUG) {
                     console.log("key: text=" + data.text);
@@ -117,6 +123,12 @@ function BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, brows
         if (DEBUG) {
             console.log('Browser connected');
         }
+
+        socket.on('disconnect', function(socket) {
+            if (DEBUG) {
+                console.log('Browser disconnected');
+            }
+        });
 
         //generate new session id here
         var sessionId = uuid.v4();
