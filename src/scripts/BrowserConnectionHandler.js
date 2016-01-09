@@ -1,7 +1,7 @@
 var uuid = require('node-uuid');
 var _ = require('lodash');
 
-function BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, DEBUG) {
+function BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, androidConnectionHandler, DEBUG) {
     var browsers = io.of(browserEndpoint);
     var self = this;
 
@@ -101,6 +101,8 @@ function BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, brows
         app.get('/' + sessionId, function(req, res) {
             res.sendfile(path.resolve('src/html/session.html'));
         });
+
+        androidConnectionHandler.listenOnSessionId(sessionId);
 
         io.of(clientEndpoint).emit('sessions', sessions);
 

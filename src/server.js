@@ -30,14 +30,14 @@ var sessionBrowsers = {};
 var sessionAndroid = {};
 var sessions = [];
 
+var AndroidConnectionHandler = require('./scripts/AndroidConnectionHandler');
+var androidConnectionHandler = new AndroidConnectionHandler(io, sessionAndroid, androidEndpoint, DEBUG);
+
 var BrowserConnectionHandler = require('./scripts/BrowserConnectionHandler');
-var browserConnectionHandler = new BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, DEBUG);
+var browserConnectionHandler = new BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, androidConnectionHandler, DEBUG);
 
 var ClientConnectionHandler = require('./scripts/ClientConnectionHandler');
 var clientConnectionHandler = new ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrowsers, sessionAndroid, browserConnectionHandler, DEBUG);
-
-var AndroidConnectionHandler = require('./scripts/AndroidConnectionHandler');
-var androidConnectionHandler = new AndroidConnectionHandler(io, sessionAndroid);
 
 var HttpConnectionHandler = require('./scripts/HttpConnectionHandler');
 var httpConnectionHandler = new HttpConnectionHandler(io, path, imgPath, http, port, app, sessionBrowsers, clientEndpoint);

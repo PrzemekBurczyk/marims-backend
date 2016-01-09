@@ -1,11 +1,17 @@
-function AndroidConnectionHandler(io, sessionAndroid) {
-    io.on('connection', function(socket) {
-        //Android connected
-        socket.on('register', function(data) {
-            sessionAndroid[data.sessionId] = socket;
+function AndroidConnectionHandler(io, sessionAndroid, androidEndpoint, DEBUG) {
+    this.listenOnSessionId = function(sessionId) {
+        var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
+
+        // creating browser websocket listener for generated session
+        sessionAndroid[sessionId] = io.of(androidWebsocketUrl);
+        sessionAndroid[sessionId].on('connection', function(socket) {
+            if (DEBUG) {
+                console.log('Android connected to session ' + sessionId);
+            }
         });
 
-    });
+        return androidWebsocketUrl;
+    };
 }
 
 module.exports = AndroidConnectionHandler;
