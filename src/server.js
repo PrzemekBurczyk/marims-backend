@@ -1,4 +1,4 @@
-var DEBUG = true;
+var DEBUG = false;
 var port = 5000;
 var udpPort = 6666;
 var tcpPort = 7777;
