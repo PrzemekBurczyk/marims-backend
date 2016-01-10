@@ -9,8 +9,9 @@ function HttpConnectionHandler(io, path, imgPath, http, port, app, sessionBrowse
             var applicationName = req.body.applicationName;
             var applicationVersion = req.body.applicationVersion;
             var applicationVersionCode = req.body.applicationVersionCode;
+            var applicationPackage = req.body.applicationPackage;
             if (applicationName && applicationVersion && applicationVersionCode) {
-                return callback(null, applicationName + '-' + applicationVersion + '-(' + applicationVersionCode + ').apk');
+                return callback(null, '[' + applicationPackage + ']' + applicationName + '-' + applicationVersion + '-(' + applicationVersionCode + ').apk');
             } else {
                 return callback(null, file.originalname);
             }
@@ -23,7 +24,8 @@ function HttpConnectionHandler(io, path, imgPath, http, port, app, sessionBrowse
             var applicationName = req.body.applicationName;
             var applicationVersion = req.body.applicationVersion;
             var applicationVersionCode = req.body.applicationVersionCode;
-            if (applicationName && applicationVersion && applicationVersionCode) {
+            var applicationPackage = req.body.applicationPackage;
+            if (applicationName && applicationVersion && applicationVersionCode && applicationPackage) {
                 return callback(null, true);
             } else {
                 return callback(null, false);
