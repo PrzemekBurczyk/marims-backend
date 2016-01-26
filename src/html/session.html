@@ -11,6 +11,7 @@
             border-radius: 4px;
             padding: 5px;
             height: 85vh;
+            height: calc(100% - 40px);
             height: calc(100vh - 91px);
             overflow-y: auto;
             background: #2B2B2B;
@@ -87,7 +88,8 @@
         socket.on('logs', function(log) {
             var logElement = document.createElement("div");
             var textNode = document.createTextNode(log);
-            var logLevel = log.split(/\s+/, 5)[4].toLowerCase();
+            var logLevelString = log.split(/\s+/, 5)[4];
+            var logLevel = logLevelString ? logLevelString.toLowerCase() : 'd';
             switch (logLevel) {
                 case 'e':
                     logElement.className = 'log-error';
@@ -111,10 +113,15 @@
 
         var lastEvent = null;
 
-        init = function(image, screenWidth, screenHeight) {
-            var canvas = document.getElementById("canvas");
+        requestAnimFrame = (function(callback) {
+            return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+                    function(callback) {
+                        window.setTimeout(callback, 1000 / 60);
+                    };
+        })();
 
-            var canvasContainer = document.getElementById("canvas-container");
+        init = function(image, screenWidth, screenHeight) {
+
             var containerWidth = canvasContainer.offsetWidth;
             var containerHeight = window.innerHeight;
 
@@ -129,25 +136,27 @@
             var onCanvasXOffset = (containerWidth - phoneFrameRealWidth) / 2;
             var onCanvasYOffset = (containerHeight - phoneFrameRealHeight) / 2;
 
-            canvas.height = containerHeight - 50;//phoneFrameRealHeight;
-            canvas.width = containerWidth;//phoneFrameRealWidth;
-            var ctx = canvas.getContext("2d");
-            var img = document.getElementById("phone");
+            canvas.height = containerHeight - 50; //phoneFrameRealHeight;
+            canvas.width = containerWidth; //phoneFrameRealWidth;
 
-            ctx.drawImage(img, onCanvasXOffset, onCanvasYOffset, phoneFrameRealWidth, phoneFrameRealHeight);
+            ctx.drawImage(frameImg, onCanvasXOffset, onCanvasYOffset, phoneFrameRealWidth, phoneFrameRealHeight);
 
             var phoneScreenRealHeight = phoneFrameRealHeight * phoneFrameScreenPercentageHeight;
             var phoneScreenRealWidth = phoneFrameRealWidth * phoneFrameScreenPercentageWidth;
             var phoneScreenOffsetRealHeight = phoneFrameScreenPercentageOffsetY * phoneFrameRealHeight;
             var phoneScreenOffsetRealWidth = phoneFrameScreenPercentageOffsetX * phoneFrameRealWidth;
-            var screenImg = null;
-            if (image !== null && image !== undefined) {
-                screenImg = document.createElement("img");
+
+            if (image) {
+                screenImg.onload = function() {
+                    ctx.drawImage(screenImg, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
+                };
                 screenImg.src = 'data:image/jpg;base64,' + image;
-                ctx.drawImage(screenImg, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
+                if (screenImg.naturalWidth) {
+                    screenImg.onload = null;
+                    ctx.drawImage(screenImg, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
+                }
             } else {
-                screenImg = document.getElementById("placeholder");
-                ctx.drawImage(screenImg, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
+                ctx.drawImage(deviceDisconnectedImg, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
             }
 
             var screenLeftBorder = phoneScreenOffsetRealWidth;
@@ -301,8 +310,6 @@
 </nav>
 <div style="margin-top: 0;">
     <div id="canvas-container" class="col-md-6" style="padding: 0">
-        <img id="phone" src="Nexus_5_Mockup.png" hidden/>
-        <img id="placeholder" src="device_disconnected.png" hidden/>
         <canvas id="canvas" style="cursor:default"></canvas>
 
         <div class="col-md-12">
@@ -351,6 +358,14 @@
     });
 
     var logsContainer = document.getElementById("logs-container");
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    var canvasContainer = document.getElementById("canvas-container");
+    var frameImg = new Image();
+    frameImg.src = 'Nexus_5_Mockup.png';
+    var deviceDisconnectedImg = new Image();
+    deviceDisconnectedImg.src = 'device_disconnected.png';
+    var screenImg = new Image();
 </script>
 </body>
 </html>
