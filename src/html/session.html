@@ -8,13 +8,6 @@
     <script>
         var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 
-        // var phoneFrameImageWidth = 1690;
-        // var phoneFrameImageHeight = 2857;
-        // var phoneFrameScreenWidth = 1080;
-        // var phoneFrameScreenHeight = 1920;
-        // var phoneFrameScreenOffsetX = 304;
-        // var phoneFrameScreenOffsetY = 436;
-
         var phoneFrameImageWidth = 816;
         var phoneFrameImageHeight = 1107;
         var phoneFrameScreenWidth = 487;
@@ -27,13 +20,36 @@
         var phoneFrameScreenPercentageOffsetX = phoneFrameScreenOffsetX / phoneFrameImageWidth;
         var phoneFrameScreenPercentageOffsetY = phoneFrameScreenOffsetY / phoneFrameImageHeight;
 
+        var androidConnected = false;
+
         var lastRefreshTime = Date.now();
 
+        var lastImage = null;
+        var lastScreenWidth = null;
+        var lastScreenHeight = null;
+
         var refresh = function(image, screenWidth, screenHeight) {
-            if (image !== null && image !== undefined) {
-                this.init(image, screenWidth, screenHeight);
+            if (androidConnected && image !== null && image !== undefined) {
+                lastImage = image;
+                lastScreenWidth = screenWidth;
+                lastScreenHeight = screenHeight;
+
+                init(image, screenWidth, screenHeight);
             }
         };
+
+        socket.on('android_connected', function() {
+            androidConnected = true;
+
+            lastImage = null;
+            lastScreenWidth = null;
+            lastScreenHeight = null;
+        });
+
+        socket.on('android_disconnected', function() {
+            androidConnected = false;
+            init(null, 1080, 1920);
+        });
 
         socket.on('refresh', function(data) {
             if (data !== null && data !== undefined) {
@@ -45,7 +61,7 @@
 
         var lastEvent = null;
 
-        this.init = function(image, screenWidth, screenHeight) {
+        init = function(image, screenWidth, screenHeight) {
             var canvas = document.getElementById("canvas");
 
             var phoneFrameRealHeight = (window.innerHeight - 100) * 0.9;
@@ -78,7 +94,6 @@
             } else {
                 screenImg = document.getElementById("placeholder");
                 ctx.drawImage(screenImg, phoneScreenOffsetRealWidth + onCanvasXOffset, phoneScreenOffsetRealHeight + onCanvasYOffset, phoneScreenRealWidth, phoneScreenRealHeight);
-
             }
 
             var screenLeftBorder = phoneScreenOffsetRealWidth;
@@ -231,7 +246,7 @@
     </div>
 </nav>
 <div style="margin-top: 0;">
-    <div>
+    <div class="col-md-12">
         <img id="phone" src="Nexus_5_Mockup.png" hidden/>
         <img id="placeholder" src="device_disconnected.png" hidden/>
         <canvas id="canvas" style="cursor:default"></canvas>
@@ -266,6 +281,13 @@
             socket.emit('specialKey', {
                 name: 'DELETE'
             });
+        });
+        $(window).resize(function() {
+            if (androidConnected) {
+                init(lastImage, lastScreenWidth, lastScreenHeight);
+            } else {
+                init(null, 1080, 1920);
+            }
         });
     });
 </script>

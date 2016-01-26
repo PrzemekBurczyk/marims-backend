@@ -5,6 +5,8 @@ var tcpPort = 7777;
 
 require('colors');
 
+console.log(('DEBUG: ' + DEBUG).yellow);
+
 var dgram = require('dgram');
 var net = require('net');
 
@@ -31,7 +33,7 @@ var sessionAndroid = {};
 var sessions = [];
 
 var AndroidConnectionHandler = require('./scripts/AndroidConnectionHandler');
-var androidConnectionHandler = new AndroidConnectionHandler(io, sessionAndroid, androidEndpoint, DEBUG);
+var androidConnectionHandler = new AndroidConnectionHandler(io, sessionAndroid, androidEndpoint, sessionBrowsers, DEBUG);
 
 var BrowserConnectionHandler = require('./scripts/BrowserConnectionHandler');
 var browserConnectionHandler = new BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, androidConnectionHandler, DEBUG);
