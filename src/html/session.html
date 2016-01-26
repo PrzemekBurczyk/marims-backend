@@ -5,6 +5,32 @@
     <link href='http://fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <link href="/css/main.css" rel="stylesheet">
+    <style type="text/css">
+        .logs-container {
+            border: 1px solid #757573;
+            border-radius: 4px;
+            padding: 5px;
+            height: calc(100vh - 91px);
+            overflow-y: auto;
+            background: #2B2B2B;
+        }
+
+        .log-debug {
+            color: #BBBBBB;
+        }
+
+        .log-info {
+            color: #287BDE;
+        }
+
+        .log-warning {
+            color: #ffc520;
+        }
+
+        .log-error {
+            color: #FF6B68;
+        }
+    </style>
     <script>
         var socket = io.connect('http://' + location.host + '/browser' + location.pathname);
 
@@ -57,6 +83,29 @@
             }
         });
 
+        socket.on('logs', function(log) {
+            var logElement = document.createElement("div");
+            var textNode = document.createTextNode(log);
+            var logLevel = log.split(/\s+/, 5)[4].toLowerCase();
+            switch (logLevel) {
+                case 'e':
+                    logElement.className = 'log-error';
+                    break;
+                case 'w':
+                    logElement.className = 'log-warning';
+                    break;
+                case 'i':
+                    logElement.className = 'log-info';
+                    break;
+                default:
+                    logElement.className = 'log-debug';
+                    break;
+            }
+            logElement.appendChild(textNode);
+            logsContainer.appendChild(logElement);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+        });
+
         var gestureModeActive = false;
 
         var lastEvent = null;
@@ -64,7 +113,11 @@
         init = function(image, screenWidth, screenHeight) {
             var canvas = document.getElementById("canvas");
 
-            var phoneFrameRealHeight = (window.innerHeight - 100) * 0.9;
+            var canvasContainer = document.getElementById("canvas-container");
+            var containerWidth = canvasContainer.offsetWidth;
+            var containerHeight = window.innerHeight;
+
+            var phoneFrameRealHeight = (containerHeight - 100) * 0.9;
 
             if (screenWidth > screenHeight) {
                 phoneFrameRealHeight = phoneFrameRealHeight * screenHeight / screenWidth;
@@ -72,11 +125,11 @@
 
             var phoneFrameRealWidth = phoneFrameRealHeight * phoneFrameScreenPercentageHeight * (screenWidth / screenHeight) / phoneFrameScreenPercentageWidth;
 
-            var onCanvasXOffset = (window.innerWidth - phoneFrameRealWidth) / 2;
-            var onCanvasYOffset = (window.innerHeight - phoneFrameRealHeight) / 2;
+            var onCanvasXOffset = (containerWidth - phoneFrameRealWidth) / 2;
+            var onCanvasYOffset = (containerHeight - phoneFrameRealHeight) / 2;
 
-            canvas.height = window.innerHeight - 50;//phoneFrameRealHeight;
-            canvas.width = window.innerWidth - 100;//phoneFrameRealWidth;
+            canvas.height = containerHeight - 50;//phoneFrameRealHeight;
+            canvas.width = containerWidth;//phoneFrameRealWidth;
             var ctx = canvas.getContext("2d");
             var img = document.getElementById("phone");
 
@@ -234,7 +287,7 @@
 
 <body class="grad auto-container" id="body" onLoad="init(null, 1080, 1920)">
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation"
-     style="background-color: #272822; border-color: #272822;">
+     style="background-color: #2B2B2B; border-color: #272822;">
     <div class="container">
         <div class="navbar-header">
             <a class="navbar-brand" href="/" style="color: #C0C0C0;"><b>MARIMS</b></a>
@@ -246,27 +299,32 @@
     </div>
 </nav>
 <div style="margin-top: 0;">
-    <div class="col-md-12">
+    <div id="canvas-container" class="col-md-6" style="padding: 0">
         <img id="phone" src="Nexus_5_Mockup.png" hidden/>
         <img id="placeholder" src="device_disconnected.png" hidden/>
         <canvas id="canvas" style="cursor:default"></canvas>
+
+        <div class="col-md-12">
+            <div class="col-md-1 col-sm-0"></div>
+            <div class="col-md-2" style="margin: 5px; padding: 0;">
+                <button id="delete" style="background-color: #2B2B2B; border-color: #757573"
+                        class="btn btn-success btn-block">DEL
+                </button>
+            </div>
+            <div class="col-md-6" style="margin: 5px; padding: 0;">
+                <input id="text-input" class="form-control col-md-12">
+            </div>
+            <div class="col-md-2" style="margin: 5px; padding: 0;">
+                <button id="send" style="background-color: #2B2B2B; border-color: #757573"
+                        class="btn btn-success btn-block">SEND
+                </button>
+            </div>
+            <div class="col-md-1 col-sm-0"></div>
+        </div>
     </div>
-    <div class="col-md-12">
-        <div class="col-md-1"></div>
-        <div class="col-md-2" style="margin: 5px;">
-            <button id="delete" style="background-color: #272822; border-color: #757573"
-                    class="btn btn-success btn-block">DEL
-            </button>
+    <div class="col-md-6" style="margin-top: 71px; padding-left: 20px; padding-right: 20px;">
+        <div id="logs-container" class="logs-container">
         </div>
-        <div class="col-md-6" style="margin: 5px;">
-            <input id="text-input" class="form-control col-md-12">
-        </div>
-        <div class="col-md-2" style="margin: 5px;">
-            <button id="send" style="background-color: #272822; border-color: #757573"
-                    class="btn btn-success btn-block">SEND
-            </button>
-        </div>
-        <div class="col-md-1"></div>
     </div>
 </div>
 
@@ -290,6 +348,8 @@
             }
         });
     });
+
+    var logsContainer = document.getElementById("logs-container");
 </script>
 </body>
 </html>

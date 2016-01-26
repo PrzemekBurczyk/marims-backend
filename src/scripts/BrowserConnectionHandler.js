@@ -22,6 +22,11 @@ function BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, brows
                 console.log('Browser connected to session ' + sessionId);
             }
 
+            var androidSocket = sessionAndroid[sessionId];
+            if (androidSocket !== undefined && androidSocket !== null) {
+                sessionBrowsers[sessionId].emit('android_connected');
+            }
+
             socket.on('disconnect', function(socket) {
                 if (DEBUG) {
                     console.log('Browser disconnected from session ' + sessionId);
