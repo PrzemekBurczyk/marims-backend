@@ -225,15 +225,6 @@
             ]
         };
 
-        window.onload = function() {
-            zingchart.render({
-                id: 'chart',
-                data: chartData,
-                height: "100%",
-                width: "100%"
-            });
-        };
-
         var gestureModeActive = false;
 
         var lastEvent = null;
@@ -465,6 +456,13 @@
 
 <script>
     $(function() {
+        zingchart.render({
+            id: 'chart',
+            data: chartData,
+            height: "100%",
+            width: "100%"
+        });
+
         $('#send').click(function() {
             socket.emit('key', {
                 text: $('#text-input').val()
