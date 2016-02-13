@@ -122,45 +122,9 @@
             logsContainer.scrollTop = logsContainer.scrollHeight;
         });
 
-        var maxNodes = 10;
-        var chartNodes = 0;
         var lastMemoryStatus = null;
         socket.on('memoryStatus', function(memoryStatus) {
-            var max = memoryStatus.max;
-            var total = memoryStatus.total;
-            var used = memoryStatus.used;
-            var free = memoryStatus.free;
-            var timestamp = memoryStatus.timestamp;
-
             lastMemoryStatus = memoryStatus;
-
-            console.log('adding...');
-            zingchart.exec('chart', 'addnode', {
-                plotindex: 0,
-                value: [timestamp, used / 1000000]
-            });
-
-            zingchart.exec('chart', 'addnode', {
-                plotindex: 1,
-                value: [timestamp, free / 1000000]
-            });
-
-            ++chartNodes;
-
-            if (chartNodes > maxNodes) {
-                console.log('removing...', chartNodes);
-                zingchart.exec('chart', 'removenode', {
-                    plotindex: 0,
-                    nodeindex: 0
-                });
-
-                zingchart.exec('chart', 'removenode', {
-                    plotindex: 1,
-                    nodeindex: 0
-                });
-
-                --chartNodes;
-            }
         });
 
         var feed = function(callback) {
@@ -176,13 +140,14 @@
             "background-color": "#45494A",
             "type": "area",
             "stacked": true,
-//            "refresh": {
-//                "type": "feed",
-//                "transport": "js",
-//                "url": "feed()",
-//                "max-ticks": 10,
-//                "interval": 200
-//            },
+            "refresh": {
+                "type": "feed",
+                "transport": "js",
+                "url": "feed()",
+                "max-ticks": 100,
+//                "reset-timeout": 200,
+                "interval": 100
+            },
             "title": {
                 "text": "Memory usage",
                 "text-align": "center",
