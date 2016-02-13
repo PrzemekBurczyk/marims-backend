@@ -32,6 +32,16 @@ function AndroidConnectionHandler(io, sessionAndroid, androidEndpoint, sessionBr
                     sessionBrowsers[sessionId].emit('logs', log);
                 }
             });
+
+            socket.on('memoryStatus', function(memoryStatus) {
+                if (DEBUG) {
+                    console.log('Android memory status: ' + JSON.stringify(memoryStatus, null, 2));
+                }
+
+                if (sessionBrowsers[sessionId] !== undefined && sessionBrowsers[sessionId] !== null) {
+                    sessionBrowsers[sessionId].emit('memoryStatus', memoryStatus);
+                }
+            });
         });
 
         return androidWebsocketUrl;

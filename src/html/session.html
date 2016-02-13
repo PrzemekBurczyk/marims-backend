@@ -4,15 +4,28 @@
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href='http://fonts.googleapis.com/css?family=Droid+Serif|Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="http://cdn.zingchart.com/zingchart.min.js"></script>
     <link href="/css/main.css" rel="stylesheet">
     <style type="text/css">
+        .chart-container {
+            margin-top: 10px;
+            height: 30vh;
+            height: calc(30% - 20px - 5px);
+            height: calc(30vh - 46px - 5px);
+        }
+
+        .chart {
+            width: 100%;
+            height: 100%;
+        }
+
         .logs-container {
             border: 1px solid #757573;
             border-radius: 4px;
             padding: 5px;
-            height: 85vh;
-            height: calc(100% - 40px);
-            height: calc(100vh - 91px);
+            height: 50vh;
+            height: calc(70% - 20px - 5px);
+            height: calc(70vh - 45px - 5px);
             overflow-y: auto;
             background: #2B2B2B;
         }
@@ -108,6 +121,153 @@
             logsContainer.appendChild(logElement);
             logsContainer.scrollTop = logsContainer.scrollHeight;
         });
+
+        var maxNodes = 10;
+        var chartNodes = 0;
+        var lastMemoryStatus = null;
+        socket.on('memoryStatus', function(memoryStatus) {
+            var max = memoryStatus.max;
+            var total = memoryStatus.total;
+            var used = memoryStatus.used;
+            var free = memoryStatus.free;
+            var timestamp = memoryStatus.timestamp;
+
+            lastMemoryStatus = memoryStatus;
+
+            console.log('adding...');
+            zingchart.exec('chart', 'addnode', {
+                plotindex: 0,
+                value: [timestamp, used / 1000000]
+            });
+
+            zingchart.exec('chart', 'addnode', {
+                plotindex: 1,
+                value: [timestamp, free / 1000000]
+            });
+
+            ++chartNodes;
+
+            if (chartNodes > maxNodes) {
+                console.log('removing...', chartNodes);
+                zingchart.exec('chart', 'removenode', {
+                    plotindex: 0,
+                    nodeindex: 0
+                });
+
+                zingchart.exec('chart', 'removenode', {
+                    plotindex: 1,
+                    nodeindex: 0
+                });
+
+                --chartNodes;
+            }
+        });
+
+        var feed = function(callback) {
+            if (!lastMemoryStatus) return callback();
+            var tick = {};
+            tick.plot0 = [lastMemoryStatus.timestamp, lastMemoryStatus.used / 1000000];
+            tick.plot1 = [lastMemoryStatus.timestamp, lastMemoryStatus.free / 1000000];
+            callback(JSON.stringify(tick));
+        };
+
+        zingchart.THEME = "classic";
+        var chartData = {
+            "background-color": "#45494A",
+            "type": "area",
+            "stacked": true,
+//            "refresh": {
+//                "type": "feed",
+//                "transport": "js",
+//                "url": "feed()",
+//                "max-ticks": 10,
+//                "interval": 200
+//            },
+            "title": {
+                "text": "Memory usage",
+                "text-align": "center",
+                "font-color": "#808080",
+                "font-size": "14px",
+                "background-color": "none"
+            },
+            "plotarea": {
+                "margin": "15% 5% 15% 10%"
+            },
+            "scale-x": {
+                "line-color": "#808080",
+                "step": 1000,
+                "transform": {
+                    "type": "date",
+                    "all": "%H:%i:%s",
+                    "item": {
+                        "visible": false
+                    }
+                },
+                "tick": {
+                    "line-color": "#808080"
+                },
+                "item": {
+                    "font-color": "#808080"
+                }
+            },
+            "scale-y": {
+                "line-color": "#808080",
+                "tick": {
+                    "line-color": "#808080"
+                },
+                "item": {
+                    "padding": "4px",
+                    "font-color": "#808080"
+                },
+                "label": {
+                    "text": "Memory [MB]",
+                    "font-color": "#808080"
+                }
+            },
+            "plot": {
+                "active-area": true,
+                "tooltip-text": "%t: %v MB"
+            },
+            "legend": {
+                "visible": false
+            },
+            "tooltip": {
+                "shadow": false
+            },
+            "series": [
+                {
+                    "values": [],
+                    "text": "Allocated",
+                    "line-color": "#547696",
+                    "line-width": 2,
+                    "shadow": false,
+                    "marker": {
+                        "visible": false
+                    },
+                    "background-color": "#78ABD9"
+                },
+                {
+                    "values": [],
+                    "text": "Free",
+                    "line-color": "#383D40",
+                    "line-width": 2,
+                    "shadow": true,
+                    "marker": {
+                        "visible": false
+                    },
+                    "background-color": "#51585C"
+                }
+            ]
+        };
+
+        window.onload = function() {
+            zingchart.render({
+                id: 'chart',
+                data: chartData,
+                height: "100%",
+                width: "100%"
+            });
+        };
 
         var gestureModeActive = false;
 
@@ -331,7 +491,9 @@
         </div>
     </div>
     <div class="col-md-6" style="margin-top: 71px; padding-left: 20px; padding-right: 20px;">
-        <div id="logs-container" class="logs-container">
+        <div id="logs-container" class="logs-container"></div>
+        <div id="chart-container" class="chart-container">
+            <div id="chart" class="chart"></div>
         </div>
     </div>
 </div>
