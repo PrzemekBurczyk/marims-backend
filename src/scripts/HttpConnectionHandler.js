@@ -2,6 +2,9 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
     var fs = require('fs');
     var path = require('path');
     var multer = require('multer');
+    var async = require('async');
+    var Users = require('../models/User');
+    var Tokens = require('../models/Token');
 
     var storage = multer.diskStorage({
         destination: 'files/',
@@ -57,6 +60,35 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
         res.sendfile(path.resolve(imgPath));
     });
 
+    app.post('/register', function(req, res, next) {
+        var email = req.body.email;
+        var password = req.body.password;
+        Users.getByEmail(email, function(err, existingUser) {
+            if (err) return next(err);
+            if (existingUser) return res.status(400).send('Email already in use');
+
+            var user = {
+                email: email
+            };
+
+            async.waterfall([
+                function(callback) {
+                    Users.create(user, password, callback);
+                },
+                function(user, callback) {
+                    Tokens.createForUser(user._id, callback);
+                }
+            ], function(err, token) {
+                if (err) return next(err);
+                res.status(201).send({
+                    email: email,
+                    id: token.user,
+                    token: token._id
+                });
+            });
+        });
+    });
+
     app.post('/files', upload.single('file'), function(req, res, next) {
         if (req.file) {
             res.status(204).send();
@@ -91,6 +123,19 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
                 io.of(clientEndpoint).emit('files', files);
             });
         });
+    });
+
+    app.use(function(req, res, next) {
+        var err = new Error('Page not found: ' + req.originalUrl);
+        err.status = 404;
+        return next(err);
+    });
+
+    app.use(function(err, req, res, next) {
+        return res.status(err.status || 500).send({
+            name: err.name,
+            message: err.message
+        })
     });
 }
 
