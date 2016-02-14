@@ -6,10 +6,7 @@ module.exports.authorize = function(req, res, next) {
 
         if (!user) {
             if (res.status) {
-                return res.status(401).send({
-                    code: 'BadCredentials',
-                    msg: 'Unauthorized due to invalid authorization token'
-                });
+                return res.status(401).send('Unauthorized due to invalid authorization token');
             } else {
                 return next(new Error('Bad credentials'));
             }

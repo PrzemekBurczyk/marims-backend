@@ -49,10 +49,7 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
             if (err) return next(err);
 
             if (!user) {
-                return res.status(401).send({
-                    code: 'BadCredentials',
-                    msg: 'Unauthorized due to invalid login data'
-                });
+                return res.status(401).send('Unauthorized due to invalid login data');
             }
 
             req.logIn(user, { session: false }, function(err) {
