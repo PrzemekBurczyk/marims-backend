@@ -1,4 +1,4 @@
-function HttpConnectionHandler(io, path, imgPath, http, port, app, sessionBrowsers, clientEndpoint) {
+function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, clientEndpoint) {
     var fs = require('fs');
     var path = require('path');
     var multer = require('multer');

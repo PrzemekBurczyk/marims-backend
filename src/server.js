@@ -52,13 +52,13 @@ async.series([
     var androidConnectionHandler = new AndroidConnectionHandler(io, sessionAndroid, androidEndpoint, sessionBrowsers, DEBUG);
 
     var BrowserConnectionHandler = require('./scripts/BrowserConnectionHandler');
-    var browserConnectionHandler = new BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, androidConnectionHandler, DEBUG);
+    var browserConnectionHandler = new BrowserConnectionHandler(app, io, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, androidConnectionHandler, DEBUG);
 
     var ClientConnectionHandler = require('./scripts/ClientConnectionHandler');
     var clientConnectionHandler = new ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrowsers, sessionAndroid, browserConnectionHandler, DEBUG);
 
     var HttpConnectionHandler = require('./scripts/HttpConnectionHandler');
-    var httpConnectionHandler = new HttpConnectionHandler(io, path, imgPath, http, port, app, sessionBrowsers, clientEndpoint);
+    var httpConnectionHandler = new HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, clientEndpoint);
 
     var UdpConnectionHandler = require('./scripts/UdpConnectionHandler');
     var udpConnectionHandler = new UdpConnectionHandler(dgram, udpPort, sessionBrowsers);

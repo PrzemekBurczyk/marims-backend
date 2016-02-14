@@ -1,7 +1,8 @@
 var uuid = require('node-uuid');
 var _ = require('lodash');
+var path = require('path');
 
-function BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, androidConnectionHandler, DEBUG) {
+function BrowserConnectionHandler(app, io, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, androidConnectionHandler, DEBUG) {
     var browsers = io.of(browserEndpoint);
     var self = this;
 
