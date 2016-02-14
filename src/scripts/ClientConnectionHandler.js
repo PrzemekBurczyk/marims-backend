@@ -12,7 +12,7 @@ function ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrows
     });
     clients.on('connection', function(socket) {
         if (DEBUG) {
-            console.log('Client connected');
+            console.log('Client connected:', socket.request.user.email);
         }
 
         fs.readdir('files/', function(err, files) {
@@ -21,6 +21,12 @@ function ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrows
         });
 
         socket.emit('sessions', sessions);
+
+        socket.on('disconnect', function() {
+            if (DEBUG) {
+                console.log('Client disconnected:', socket.request.user.email);
+            }
+        });
 
         socket.on('createSession', function(filename) {
             if (DEBUG) {
