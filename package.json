@@ -26,7 +26,9 @@
     "multer": "1.1.x",
     "node-uuid": "1.4.x",
     "socket.io": "1.4.x",
-    "lodash": "3.10.x"
+    "lodash": "3.10.x",
+    "mongoose": "4.4.x",
+    "async": "1.5.x"
   },
   "directories": {
     "src": "./src",

@@ -4,48 +4,65 @@ var udpPort = 6666;
 var tcpPort = 7777;
 
 require('colors');
+var mongoose = require('mongoose');
+var async = require('async');
 
 console.log(('DEBUG: ' + DEBUG).yellow);
 
-var dgram = require('dgram');
-var net = require('net');
+async.series([
+    function(callback) {
+        console.log(('Connecting to the database...').blue);
+        mongoose.connect('mongodb://localhost/marims');
+        mongoose.connection.on('error', callback);
+        mongoose.connection.once('open', callback);
+    }
+], function(err) {
+    if (err) {
+        console.log(JSON.stringify(err, null, 2).red);
+        return process.exit(1);
+    }
+    console.log(('Database connected').green);
 
-var express = require('express');
-var bodyParser = require('body-parser');
-var path = require('path');
-var app = express();
+    var dgram = require('dgram');
+    var net = require('net');
 
-app.use(express.static('./lib'));
+    var express = require('express');
+    var bodyParser = require('body-parser');
+    var path = require('path');
+    var app = express();
 
-var http = require('http').Server(app);
-var io = require('socket.io').listen(http, { log: false });
+    app.use(express.static('./lib'));
 
-var imgPath = 'uploads/image';
+    var http = require('http').Server(app);
+    var io = require('socket.io').listen(http, { log: false });
 
-app.use(bodyParser({ limit: '5mb' }));
+    var imgPath = 'uploads/image';
 
-var androidEndpoint = '/android';
-var browserEndpoint = '/browser';
-var clientEndpoint = '/client';
+    app.use(bodyParser({ limit: '5mb' }));
 
-var sessionBrowsers = {};
-var sessionAndroid = {};
-var sessions = [];
+    var androidEndpoint = '/android';
+    var browserEndpoint = '/browser';
+    var clientEndpoint = '/client';
 
-var AndroidConnectionHandler = require('./scripts/AndroidConnectionHandler');
-var androidConnectionHandler = new AndroidConnectionHandler(io, sessionAndroid, androidEndpoint, sessionBrowsers, DEBUG);
+    var sessionBrowsers = {};
+    var sessionAndroid = {};
+    var sessions = [];
 
-var BrowserConnectionHandler = require('./scripts/BrowserConnectionHandler');
-var browserConnectionHandler = new BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, androidConnectionHandler, DEBUG);
+    var AndroidConnectionHandler = require('./scripts/AndroidConnectionHandler');
+    var androidConnectionHandler = new AndroidConnectionHandler(io, sessionAndroid, androidEndpoint, sessionBrowsers, DEBUG);
 
-var ClientConnectionHandler = require('./scripts/ClientConnectionHandler');
-var clientConnectionHandler = new ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrowsers, sessionAndroid, browserConnectionHandler, DEBUG);
+    var BrowserConnectionHandler = require('./scripts/BrowserConnectionHandler');
+    var browserConnectionHandler = new BrowserConnectionHandler(app, io, path, sessions, clientEndpoint, browserEndpoint, androidEndpoint, sessionBrowsers, sessionAndroid, androidConnectionHandler, DEBUG);
 
-var HttpConnectionHandler = require('./scripts/HttpConnectionHandler');
-var httpConnectionHandler = new HttpConnectionHandler(io, path, imgPath, http, port, app, sessionBrowsers, clientEndpoint);
+    var ClientConnectionHandler = require('./scripts/ClientConnectionHandler');
+    var clientConnectionHandler = new ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrowsers, sessionAndroid, browserConnectionHandler, DEBUG);
 
-var UdpConnectionHandler = require('./scripts/UdpConnectionHandler');
-var udpConnectionHandler = new UdpConnectionHandler(dgram, udpPort, sessionBrowsers);
+    var HttpConnectionHandler = require('./scripts/HttpConnectionHandler');
+    var httpConnectionHandler = new HttpConnectionHandler(io, path, imgPath, http, port, app, sessionBrowsers, clientEndpoint);
 
-var TcpConnectionHandler = require('./scripts/TcpConnectionHandler');
-var tcpConnectionHandler = new TcpConnectionHandler(net, tcpPort, sessionBrowsers);
+    var UdpConnectionHandler = require('./scripts/UdpConnectionHandler');
+    var udpConnectionHandler = new UdpConnectionHandler(dgram, udpPort, sessionBrowsers);
+
+    var TcpConnectionHandler = require('./scripts/TcpConnectionHandler');
+    var tcpConnectionHandler = new TcpConnectionHandler(net, tcpPort, sessionBrowsers);
+});
