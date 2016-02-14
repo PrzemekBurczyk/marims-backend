@@ -4,7 +4,11 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
     var multer = require('multer');
     var async = require('async');
     var Users = require('../models/User');
+    var User = Users.User;
     var Tokens = require('../models/Token');
+    var passport = require('passport');
+    var _ = require('lodash');
+    var HttpBearerStrategy = require('passport-http-bearer').Strategy;
 
     var storage = multer.diskStorage({
         destination: 'files/',
@@ -39,9 +43,54 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
         }
     });
 
-    http.listen(port, function() {
-        console.log(('HTTP listening on ' + port).green);
-    });
+    var logIn = function(req, res, next) {
+        passport.authenticate('local', function(err, user, info) {
+            if (err) return next(err);
+
+            if (!user) {
+                return res.status(401).send({
+                    code: 'BadCredentials',
+                    msg: 'Unauthorized due to invalid login data'
+                });
+            }
+
+            req.logIn(user, { session: false }, function(err) {
+                return next(err);
+            });
+        })(req, res, next);
+    };
+
+    var authorize = function(req, res, next) {
+        passport.authenticate('bearer', function(err, user, info) {
+            if (err) return next(err);
+
+            if (!user) {
+                return res.status(401).send({
+                    code: 'BadCredentials',
+                    msg: 'Unauthorized due to invalid authorization token'
+                });
+            }
+
+            req.logIn(user, { session: false }, function(err) {
+                return next(err);
+            });
+        })(req, res, next);
+    };
+
+    app.use(passport.initialize());
+
+    passport.use(User.createStrategy());
+    passport.use(new HttpBearerStrategy(function(token, done) {
+        process.nextTick(function() {
+            Tokens.get(token, function(err, localToken) {
+                if (err) return done(err);
+                if (!localToken || !localToken.user) return done(null, false);
+                return done(null, _.assign(localToken.user, {
+                    token: token
+                }));
+            });
+        });
+    }));
 
     app.get('/', function(req, res) {
         res.sendfile(path.resolve('src/html/index.html'));
@@ -86,6 +135,17 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
                     token: token._id
                 });
             });
+        });
+    });
+
+    app.post('/login', logIn, function(req, res, next) {
+        Tokens.createForUser(req.user._id, function(err, token) {
+            if (err) return next(err);
+            return res.status(200).send({
+                email: req.user.email,
+                id: req.user._id,
+                token: token._id
+            })
         });
     });
 
@@ -136,6 +196,10 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
             name: err.name,
             message: err.message
         })
+    });
+
+    http.listen(port, function() {
+        console.log(('HTTP listening on ' + port).green);
     });
 }
 
