@@ -149,7 +149,14 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
         });
     });
 
-    app.post('/files', upload.single('file'), function(req, res, next) {
+    app.post('/logout', authorize, function(req, res, next) {
+        Tokens.delete(req.user.token, function(err) {
+            if (err) return next(err);
+            return res.status(204).send();
+        });
+    });
+
+    app.post('/files', authorize, upload.single('file'), function(req, res, next) {
         if (req.file) {
             res.status(204).send();
             fs.readdir('files/', function(err, files) {
@@ -161,19 +168,19 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
         }
     });
 
-    app.get('/files', function(req, res, next) {
+    app.get('/files', authorize, function(req, res, next) {
         fs.readdir('files/', function(err, files) {
             if (err) return next(err);
             res.status(200).send(files);
         });
     });
 
-    app.get('/files/:filename', function(req, res, next) {
+    app.get('/files/:filename', authorize, function(req, res, next) {
         var filename = req.params.filename;
         res.status(200).sendfile(path.normalize(__dirname + '/../../files/' + filename));
     });
 
-    app.delete('/files/:filename', function(req, res, next) {
+    app.delete('/files/:filename', authorize, function(req, res, next) {
         var filename = req.params.filename;
         fs.unlink(path.normalize(__dirname + '/../../files/' + filename), function(err) {
             if (err) return res.status(400).send();
