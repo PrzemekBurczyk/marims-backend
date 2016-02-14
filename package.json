@@ -28,7 +28,11 @@
     "socket.io": "1.4.x",
     "lodash": "3.10.x",
     "mongoose": "4.4.x",
-    "async": "1.5.x"
+    "async": "1.5.x",
+    "passport": "0.3.x",
+    "passport-local": "1.0.x",
+    "passport-http-bearer": "1.0.x",
+    "passport-local-mongoose": "4.0.x"
   },
   "directories": {
     "src": "./src",
