@@ -2,10 +2,14 @@ var fs = require('fs');
 var uuid = require('node-uuid');
 var path = require('path');
 var _ = require('lodash');
+var Helpers = require('./Helpers');
 
 function ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrowsers, sessionAndroid, browserConnectionHandler, DEBUG) {
 
     var clients = io.of(clientEndpoint);
+    clients.use(function(socket, next) {
+        Helpers.authorize(socket.request, {}, next);
+    });
     clients.on('connection', function(socket) {
         if (DEBUG) {
             console.log('Client connected');
