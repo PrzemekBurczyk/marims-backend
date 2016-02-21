@@ -45,6 +45,17 @@ module.exports.addFileAuthor = function(id, filename, callback) {
     }).exec(callback);
 };
 
+module.exports.removeFileAuthor = function(id, filename, callback) {
+    if (_.isNull(id) || _.isUndefined(id)) return callback();
+    if (_.isNull(filename) || _.isUndefined(filename)) return callback();
+
+    User.findOneAndUpdate(id, {
+        $pull: {
+            authorOfFiles: filename
+        }
+    }).exec(callback);
+};
+
 module.exports.addFileMember = function(email, filename, callback) {
     if (_.isNull(email) || _.isUndefined(email)) return callback();
     if (_.isNull(filename) || _.isUndefined(filename)) return callback();
