@@ -156,12 +156,12 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
         });
     });
 
-    app.get('/files/:filename', Helpers.authorize, function(req, res, next) {
+    app.get('/files/:filename', Helpers.authorize, Helpers.checkIfFileAuthorOrMember, function(req, res, next) {
         var filename = req.params.filename;
         res.status(200).sendfile(path.normalize(__dirname + '/../../files/' + filename));
     });
 
-    app.delete('/files/:filename', Helpers.authorize, function(req, res, next) {
+    app.delete('/files/:filename', Helpers.authorize, Helpers.checkIfFileAuthor, function(req, res, next) {
         var filename = req.params.filename;
         fs.unlink(path.normalize(__dirname + '/../../files/' + filename), function(err) {
             if (err) return res.status(400).send();

@@ -34,6 +34,11 @@ module.exports.getByEmail = function(email, callback) {
     User.findOne({ email: email }).exec(callback);
 };
 
+module.exports.getById = function(id, callback) {
+    if (_.isNull(id) || _.isUndefined(id)) return callback();
+    User.findById(id).exec(callback);
+};
+
 module.exports.addFileAuthor = function(id, filename, callback) {
     if (_.isNull(id) || _.isUndefined(id)) return callback();
     if (_.isNull(filename) || _.isUndefined(filename)) return callback();

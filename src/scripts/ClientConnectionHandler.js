@@ -3,6 +3,7 @@ var uuid = require('node-uuid');
 var path = require('path');
 var _ = require('lodash');
 var Helpers = require('./Helpers');
+var Users = require('../models/User');
 
 function ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrowsers, sessionAndroid, browserConnectionHandler, DEBUG) {
 
@@ -45,6 +46,26 @@ function ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrows
             if (!browserConnectionHandler.stopListeningOnSessionId(sessionId)) {
                 return socket.emit('sessionRemovalFailed');
             }
+        });
+
+        socket.on('addMember', function(email, filename) {
+            if (DEBUG) {
+                console.log('Adding member: ' + email + ' to file: ' + filename);
+            }
+
+            Users.addFileMember(email, filename, function(err, user) {
+                if (err) return console.log(err);
+            });
+        });
+
+        socket.on('removeMember', function(email, filename) {
+            if (DEBUG) {
+                console.log('Removing member: ' + email + ' from file: ' + filename);
+            }
+
+            Users.removeFileMember(email, filename, function(err, user) {
+                if (err) return console.log(err);
+            });
         });
     });
 }
