@@ -18,8 +18,9 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
             var applicationVersion = req.body.applicationVersion;
             var applicationVersionCode = req.body.applicationVersionCode;
             var applicationPackage = req.body.applicationPackage;
-            if (applicationName && applicationVersion && applicationVersionCode) {
-                return callback(null, '[' + applicationPackage + ']' + applicationName + '-' + applicationVersion + '-(' + applicationVersionCode + ').apk');
+            if (applicationName && applicationVersion && applicationVersionCode && applicationPackage) {
+                var filename = '[' + applicationPackage + ']' + applicationName + '-' + applicationVersion + '-(' + applicationVersionCode + ').apk';
+                return callback(null, filename);
             } else {
                 return callback(null, file.originalname);
             }
@@ -34,7 +35,10 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
             var applicationVersionCode = req.body.applicationVersionCode;
             var applicationPackage = req.body.applicationPackage;
             if (applicationName && applicationVersion && applicationVersionCode && applicationPackage) {
-                return callback(null, true);
+                var filename = '[' + applicationPackage + ']' + applicationName + '-' + applicationVersion + '-(' + applicationVersionCode + ').apk';
+                fs.readdir('files/', function(err, files) {
+                    return callback(err, !_.includes(files, filename));
+                });
             } else {
                 return callback(null, false);
             }
@@ -138,11 +142,23 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
     });
 
     app.post('/files', Helpers.authorize, upload.single('file'), function(req, res, next) {
+        var user = req.user;
         if (req.file) {
-            res.status(204).send();
-            fs.readdir('files/', function(err, files) {
-                if (err) return console.log(err);
-                io.of(clientEndpoint).emit('files', files);
+            async.auto({
+                readFilesDir: function(callback) {
+                    return fs.readdir('files/', callback);
+                },
+                emitFilesEvent: ['readFilesDir', function(callback, results) {
+                    var files = results.readFilesDir;
+                    io.of(clientEndpoint).emit('files', files);
+                    return callback();
+                }],
+                addFileAuthor: function(callback) {
+                    Users.addFileAuthor(user._id, req.file.filename, callback);
+                }
+            }, function(err, results) {
+                if (err) return next(err);
+                return res.status(204).send();
             });
         } else {
             res.status(400).send("File upload failed");
@@ -163,13 +179,25 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
 
     app.delete('/files/:filename', Helpers.authorize, Helpers.checkIfFileAuthor, function(req, res, next) {
         var filename = req.params.filename;
-        fs.unlink(path.normalize(__dirname + '/../../files/' + filename), function(err) {
-            if (err) return res.status(400).send();
-            res.status(204).send();
-            fs.readdir('files/', function(err, files) {
-                if (err) return console.log(err);
+        var user = req.user;
+        async.auto({
+            unlinkFile: function(callback) {
+                return fs.unlink(path.normalize(__dirname + '/../../files/' + filename), callback);
+            },
+            readFilesDir: ['unlinkFile', function(callback) {
+                return fs.readdir('files/', callback);
+            }],
+            emitFilesEvent: ['readFilesDir', function(callback, results) {
+                var files = results.readFilesDir;
                 io.of(clientEndpoint).emit('files', files);
-            });
+                return callback();
+            }],
+            removeFileAuthor: function(callback) {
+                Users.removeFileAuthor(user._id, filename, callback);
+            }
+        }, function(err, results) {
+            if (err) return res.status(400).send();
+            return res.status(204).send();
         });
     });
 
@@ -180,6 +208,7 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
     });
 
     app.use(function(err, req, res, next) {
+        console.log(err);
         return res.status(err.status || 500).send({
             name: err.name,
             message: err.message
