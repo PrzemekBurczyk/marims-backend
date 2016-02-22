@@ -114,11 +114,28 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
                 }
             ], function(err, token) {
                 if (err) return next(err);
-                res.status(201).send({
-                    email: email,
-                    id: token.user,
-                    token: token._id
+
+                async.auto({
+                    sendResponse: function(callback) {
+                        res.status(201).send({
+                            email: email,
+                            id: token.user,
+                            token: token._id
+                        });
+                        return callback();
+                    },
+                    getUsers: function(callback) {
+                        return Users.getAll(callback);
+                    },
+                    emitUsersEvent: ['getUsers', function(callback, results) {
+                        var users = results.getUsers;
+                        io.of(clientEndpoint).emit('users', _.map(users, Users.toResponse));
+                        return callback();
+                    }]
+                }, function(err, results) {
+                    if (err) return console.log(err);
                 });
+
             });
         });
     });
