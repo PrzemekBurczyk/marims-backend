@@ -25,6 +25,19 @@ UserSchema.plugin(passportLocalMongoose, {
 
 var User = module.exports.User = mongoose.model(ModelNames.USER, UserSchema);
 
+module.exports.toResponse = function(user) {
+    return {
+        id: user._id,
+        email: user.email,
+        authorOfFiles: user.authorOfFiles,
+        memberOfFiles: user.memberOfFiles
+    }
+};
+
+module.exports.getAll = function(callback) {
+    User.find({}).exec(callback);
+};
+
 module.exports.create = function(user, password, callback) {
     User.register(user, password, callback);
 };

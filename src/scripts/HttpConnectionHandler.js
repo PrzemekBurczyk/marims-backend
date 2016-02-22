@@ -155,7 +155,15 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
                 }],
                 addFileAuthor: function(callback) {
                     Users.addFileAuthor(user._id, req.file.filename, callback);
-                }
+                },
+                getUsers: ['addFileAuthor', function(callback) {
+                    return Users.getAll(callback);
+                }],
+                emitUsersEvent: ['getUsers', function(callback, results) {
+                    var users = results.getUsers;
+                    io.of(clientEndpoint).emit('users', _.map(users, Users.toResponse));
+                    return callback();
+                }]
             }, function(err, results) {
                 if (err) return next(err);
                 return res.status(204).send();
@@ -194,7 +202,15 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
             }],
             removeFileAuthor: function(callback) {
                 Users.removeFileAuthor(user._id, filename, callback);
-            }
+            },
+            getUsers: ['removeFileAuthor', function(callback) {
+                return Users.getAll(callback);
+            }],
+            emitUsersEvent: ['getUsers', function(callback, results) {
+                var users = results.getUsers;
+                io.of(clientEndpoint).emit('users', _.map(users, Users.toResponse));
+                return callback();
+            }]
         }, function(err, results) {
             if (err) return res.status(400).send();
             return res.status(204).send();

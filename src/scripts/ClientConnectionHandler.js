@@ -2,6 +2,7 @@ var fs = require('fs');
 var uuid = require('node-uuid');
 var path = require('path');
 var _ = require('lodash');
+var async = require('async');
 var Helpers = require('./Helpers');
 var Users = require('../models/User');
 
@@ -16,12 +17,30 @@ function ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrows
             console.log('Client connected:', socket.request.user.email);
         }
 
-        fs.readdir('files/', function(err, files) {
-            if (err) return next(err);
-            socket.emit('files', files);
+        async.auto({
+            readFilesDir: function(callback) {
+                return fs.readdir('files/', callback);
+            },
+            emitFilesEvent: ['readFilesDir', function(callback, results) {
+                var files = results.readFilesDir;
+                socket.emit('files', files);
+                return callback();
+            }],
+            emitSessionsEvent: function(callback) {
+                socket.emit('sessions', sessions);
+                return callback();
+            },
+            getUsers: function(callback) {
+                return Users.getAll(callback);
+            },
+            emitUsersEvent: ['getUsers', function(callback, results) {
+                var users = results.getUsers;
+                socket.emit('users', _.map(users, Users.toResponse));
+                return callback();
+            }]
+        }, function(err) {
+            if (err) console.log(err);
         });
-
-        socket.emit('sessions', sessions);
 
         socket.on('disconnect', function() {
             if (DEBUG) {
@@ -53,8 +72,20 @@ function ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrows
                 console.log('Adding member: ' + email + ' to file: ' + filename);
             }
 
-            Users.addFileMember(email, filename, function(err, user) {
-                if (err) return console.log(err);
+            async.auto({
+                addFileMember: function(callback) {
+                    return Users.addFileMember(email, filename, callback);
+                },
+                getUsers: ['addFileMember', function(callback) {
+                    return Users.getAll(callback);
+                }],
+                emitUsersEvent: ['getUsers', function(callback, results) {
+                    var users = results.getUsers;
+                    io.of(clientEndpoint).emit('users', _.map(users, Users.toResponse));
+                    return callback();
+                }]
+            }, function(err) {
+                if (err) console.log(err);
             });
         });
 
@@ -63,8 +94,20 @@ function ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrows
                 console.log('Removing member: ' + email + ' from file: ' + filename);
             }
 
-            Users.removeFileMember(email, filename, function(err, user) {
-                if (err) return console.log(err);
+            async.auto({
+                removeFileMember: function(callback) {
+                    return Users.removeFileMember(email, filename, callback);
+                },
+                getUsers: ['removeFileMember', function(callback) {
+                    return Users.getAll(callback);
+                }],
+                emitUsersEvent: ['getUsers', function(callback, results) {
+                    var users = results.getUsers;
+                    io.of(clientEndpoint).emit('users', _.map(users, Users.toResponse));
+                    return callback();
+                }]
+            }, function(err) {
+                if (err) console.log(err);
             });
         });
     });
