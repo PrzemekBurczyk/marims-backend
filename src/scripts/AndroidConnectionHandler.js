@@ -3,11 +3,12 @@ function AndroidConnectionHandler(io, sessionAndroid, androidEndpoint, sessionBr
         var androidWebsocketUrl = androidEndpoint + '/' + sessionId;
 
         // creating browser websocket listener for generated session
-        sessionAndroid[sessionId] = io.of(androidWebsocketUrl);
-        sessionAndroid[sessionId].on('connection', function(socket) {
+        io.of(androidWebsocketUrl).on('connection', function(socket) {
             if (DEBUG) {
                 console.log('Android connected to session ' + sessionId);
             }
+
+            sessionAndroid[sessionId] = socket;
 
             if (sessionBrowsers[sessionId] !== undefined && sessionBrowsers[sessionId] !== null) {
                 sessionBrowsers[sessionId].emit('android_connected');
