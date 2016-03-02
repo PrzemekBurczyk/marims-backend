@@ -11,15 +11,25 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
     var _ = require('lodash');
     var HttpBearerStrategy = require('passport-http-bearer').Strategy;
 
+    function getFilename(req) {
+        var user = req.user;
+        var applicationName = req.body.applicationName;
+        var applicationVersion = req.body.applicationVersion;
+        var applicationVersionCode = req.body.applicationVersionCode;
+        var applicationPackage = req.body.applicationPackage;
+
+        if (user && applicationName && applicationVersion && applicationVersionCode && applicationPackage) {
+            return '[' + user._id.toHexString() + ']' + '[' + applicationPackage + ']' + applicationName + '-' + applicationVersion + '-(' + applicationVersionCode + ').apk';
+        } else {
+            return null;
+        }
+    }
+
     var storage = multer.diskStorage({
         destination: 'files/',
         filename: function(req, file, callback) {
-            var applicationName = req.body.applicationName;
-            var applicationVersion = req.body.applicationVersion;
-            var applicationVersionCode = req.body.applicationVersionCode;
-            var applicationPackage = req.body.applicationPackage;
-            if (applicationName && applicationVersion && applicationVersionCode && applicationPackage) {
-                var filename = '[' + applicationPackage + ']' + applicationName + '-' + applicationVersion + '-(' + applicationVersionCode + ').apk';
+            var filename = getFilename(req);
+            if (filename) {
                 return callback(null, filename);
             } else {
                 return callback(null, file.originalname);
@@ -29,20 +39,6 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
 
     var upload = multer({
         storage: storage,
-        fileFilter: function(req, file, callback) {
-            var applicationName = req.body.applicationName;
-            var applicationVersion = req.body.applicationVersion;
-            var applicationVersionCode = req.body.applicationVersionCode;
-            var applicationPackage = req.body.applicationPackage;
-            if (applicationName && applicationVersion && applicationVersionCode && applicationPackage) {
-                var filename = '[' + applicationPackage + ']' + applicationName + '-' + applicationVersion + '-(' + applicationVersionCode + ').apk';
-                fs.readdir('files/', function(err, files) {
-                    return callback(err, !_.includes(files, filename));
-                });
-            } else {
-                return callback(null, false);
-            }
-        },
         limits: {
             fieldSize: 1024 * 1024 * 100 // 100MB
         }
@@ -167,7 +163,9 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
                 },
                 emitFilesEvent: ['readFilesDir', function(callback, results) {
                     var files = results.readFilesDir;
-                    io.of(clientEndpoint).emit('files', files);
+                    io.of(clientEndpoint).emit('files', _.map(files, function(file) {
+                        return file.replace(/\[.*?\]/, '');
+                    }));
                     return callback();
                 }],
                 addFileAuthor: function(callback) {
@@ -193,7 +191,9 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
     app.get('/files', Helpers.authorize, function(req, res, next) {
         fs.readdir('files/', function(err, files) {
             if (err) return next(err);
-            res.status(200).send(files);
+            res.status(200).send(_.map(files, function(file) {
+                return file.replace(/\[.*?\]/, '');
+            }));
         });
     });
 
@@ -214,7 +214,9 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
             }],
             emitFilesEvent: ['readFilesDir', function(callback, results) {
                 var files = results.readFilesDir;
-                io.of(clientEndpoint).emit('files', files);
+                io.of(clientEndpoint).emit('files', _.map(files, function(file) {
+                    return file.replace(/\[.*?\]/, '');
+                }));
                 return callback();
             }],
             removeFileAuthor: function(callback) {

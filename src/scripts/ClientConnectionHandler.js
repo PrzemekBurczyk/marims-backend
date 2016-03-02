@@ -23,7 +23,9 @@ function ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrows
             },
             emitFilesEvent: ['readFilesDir', function(callback, results) {
                 var files = results.readFilesDir;
-                socket.emit('files', files);
+                socket.emit('files', _.map(files, function(file) {
+                    return file.replace(/\[.*?\]/, '');
+                }));
                 return callback();
             }],
             emitSessionsEvent: function(callback) {
