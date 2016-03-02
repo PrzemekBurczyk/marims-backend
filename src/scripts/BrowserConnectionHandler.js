@@ -103,11 +103,6 @@ function BrowserConnectionHandler(app, io, sessions, clientEndpoint, browserEndp
 
         });
 
-        //creating browser http listener for generated session
-        app.get('/' + sessionId, function(req, res) {
-            res.sendfile(path.resolve('src/html/session.html'));
-        });
-
         androidConnectionHandler.listenOnSessionId(sessionId);
 
         io.of(clientEndpoint).emit('sessions', sessions);

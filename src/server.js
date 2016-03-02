@@ -58,7 +58,7 @@ async.series([
     var clientConnectionHandler = new ClientConnectionHandler(app, io, clientEndpoint, sessions, sessionBrowsers, sessionAndroid, browserConnectionHandler, DEBUG);
 
     var HttpConnectionHandler = require('./scripts/HttpConnectionHandler');
-    var httpConnectionHandler = new HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, clientEndpoint);
+    var httpConnectionHandler = new HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, clientEndpoint, sessions);
 
     var UdpConnectionHandler = require('./scripts/UdpConnectionHandler');
     var udpConnectionHandler = new UdpConnectionHandler(dgram, udpPort, sessionBrowsers);

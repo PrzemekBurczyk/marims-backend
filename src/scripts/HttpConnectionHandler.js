@@ -1,4 +1,4 @@
-function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, clientEndpoint) {
+function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, clientEndpoint, sessions) {
     var fs = require('fs');
     var path = require('path');
     var multer = require('multer');
@@ -232,6 +232,16 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
             if (err) return res.status(400).send();
             return res.status(204).send();
         });
+    });
+
+    //creating browser http listener for generated session
+    app.get('/:sessionId', function(req, res, next) {
+        var sessionId = req.params.sessionId;
+        if (_.includes(_.map(sessions, 'id'), sessionId)) {
+            return res.sendfile(path.resolve('src/html/session.html'));
+        } else {
+            return next();
+        }
     });
 
     app.use(function(req, res, next) {
