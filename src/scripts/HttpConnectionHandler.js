@@ -163,9 +163,7 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
                 },
                 emitFilesEvent: ['readFilesDir', function(callback, results) {
                     var files = results.readFilesDir;
-                    io.of(clientEndpoint).emit('files', _.map(files, function(file) {
-                        return file.replace(/\[.*?\]/, '');
-                    }));
+                    io.of(clientEndpoint).emit('files', files);
                     return callback();
                 }],
                 addFileAuthor: function(callback) {
@@ -191,9 +189,7 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
     app.get('/files', Helpers.authorize, function(req, res, next) {
         fs.readdir('files/', function(err, files) {
             if (err) return next(err);
-            res.status(200).send(_.map(files, function(file) {
-                return file.replace(/\[.*?\]/, '');
-            }));
+            res.status(200).send(files);
         });
     });
 
@@ -214,9 +210,7 @@ function HttpConnectionHandler(io, imgPath, http, port, app, sessionBrowsers, cl
             }],
             emitFilesEvent: ['readFilesDir', function(callback, results) {
                 var files = results.readFilesDir;
-                io.of(clientEndpoint).emit('files', _.map(files, function(file) {
-                    return file.replace(/\[.*?\]/, '');
-                }));
+                io.of(clientEndpoint).emit('files', files);
                 return callback();
             }],
             removeFileAuthor: function(callback) {
