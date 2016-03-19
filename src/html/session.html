@@ -128,10 +128,11 @@
         });
 
         var feed = function(callback) {
-            if (!lastMemoryStatus) return callback();
             var tick = {};
-            tick.plot0 = [lastMemoryStatus.timestamp, lastMemoryStatus.used / 1000000];
-            tick.plot1 = [lastMemoryStatus.timestamp, lastMemoryStatus.free / 1000000];
+            if (lastMemoryStatus) {
+                tick.plot0 = [lastMemoryStatus.timestamp, lastMemoryStatus.used / 1000000];
+                tick.plot1 = [lastMemoryStatus.timestamp, lastMemoryStatus.free / 1000000];
+            }
             callback(JSON.stringify(tick));
         };
 
